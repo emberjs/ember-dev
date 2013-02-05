@@ -73,31 +73,6 @@ class EmberLicenseFilter < Rake::Pipeline::Filter
   end
 end
 
-class AddMicroLoader < Rake::Pipeline::Filter
-  LOADER = File.expand_path("packages/loader/lib/main.js")
-
-  def initialize(options={}, &block)
-    super(&block)
-    @global = options[:global]
-  end
-
-  def generate_output(inputs, output)
-    output.write "(function() {\n" unless @global
-
-    output.write File.read(LOADER)
-
-    inputs.each do |input|
-      output.write input.read
-    end
-
-    output.write "\n})();\n" unless @global
-  end
-
-  def additional_dependencies(input)
-    [ LOADER ]
-  end
-end
-
 class JSHintRC < Rake::Pipeline::Filter
   JSHINTRC = File.expand_path(".jshintrc")
 
@@ -120,11 +95,16 @@ end
 class VersionInfo < Rake::Pipeline::Filter
   def version_info
     @version_info ||= begin
-      latest_tag = `git describe --tags`
-      last_commit = `git log -n 1 --format="%h (%ci)"`
+      out = ""
 
-      out = "// Version: #{latest_tag}"
+      unless `git tag`.empty?
+        latest_tag = `git describe --tags`
+        out << "// Version: #{latest_tag}"
+      end
+
+      last_commit = `git log -n 1 --format="%h (%ci)"`
       out << "// Last commit: #{last_commit}"
+
       out
     end
   end

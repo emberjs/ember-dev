@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title><%= EmberDev.config.name %> Test Suite</title>
+  <link rel="stylesheet" href="qunit/qunit.css" type="text/css" media="screen">
+  <script type="text/javascript" src="qunit/qunit.js"></script>
+  <script type="text/javascript" src="minispade.js"></script>
+
+  <script type="text/javascript">
+    window.loadScript = function(url) {
+      document.write(unescape('%3Cscript src="'+url+'"%3E%3C/script%3E'));
+    };
+
+    var EmberDev = {};
+
+    EmberDev.afterEach = function() {
+      if (Ember && Ember.View) {
+        var viewIds = [], id;
+        for (id in Ember.View.views) {
+          if (Ember.View.views[id] != null) {
+            viewIds.push(id);
+          }
+        }
+
+        if (viewIds.length > 0) {
+          deepEqual(viewIds, [], "Ember.View.views should be empty");
+          Ember.View.views = [];
+        }
+      }
+    };
+  </script>
+
+  <script type="text/javascript" src="qunit_configuration.js"></script>
+</head>
+<body>
+  <h1 id="qunit-header">Ember.js Test Suite</h1>
+  <h2 id="qunit-banner"></h2>
+  <div id="qunit-testrunner-toolbar"></div>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+  <div id="qunit-fixture">test markup</div>
+
+  <script type="text/javascript">
+    if (EmberDev.jsHint) {
+      loadScript('jshint.js');
+    }
+    // Close the script tag to make sure document.write happens
+  </script>
+
+  <script type="text/javascript">
+    // Load custom version of jQuery if possible (assign to window so IE8 can use in later blocks)
+    var jQueryVersion = QUnit.urlParams.jquery || "1.9.0";
+    if (jQueryVersion !== 'none') {
+      loadScript('http://code.jquery.com/jquery-'+jQueryVersion+'.js');
+    }
+    // Close the script tag to make sure document.write happens
+  </script>
+
+  <script type="text/javascript">
+    // Fallback to default jQuery
+    if (jQueryVersion !== 'none' && !window.jQuery) {
+      if (window.console && console.warn) { console.warn("Unable to load jQuery "+jQueryVersion+". Using default."); }
+      loadScript('/lib/jquery-1.9.0.js');
+    }
+    // Close the script tag to make sure document.write happens
+  </script>
+
+  <script type="text/javascript">
+    var handlebarsVersion = QUnit.urlParams.handlebars || "1.0.rc.2";
+
+    // Fallback to default Handlebars
+    if (handlebarsVersion !== 'none') {
+      loadScript('/lib/handlebars-'+handlebarsVersion+'.js');
+    }
+    // Close the script tag to make sure document.write happens
+  </script>
+
+  <script type="text/javascript">
+    if (handlebarsVersion !== 'none' && !window.Handlebars) {
+      if (window.console && console.warn) { console.warn("Unable to load Handlebars "+handlebarsVersion+"."); }
+    }
+    // Close the script tag to make sure document.write happens
+  </script>
+
+  <% if File.exist?("tests/ember_configuration.js") %>
+    <script type="text/javascript">
+      <%= File.read("tests/ember_configuration.js") %>
+    </script>
+  <% end %>
+
+  <script>
+    // Load ember distribution from query vars
+    var distMatch = location.search.match(/dist=([^&]+)/),
+        dist = (distMatch && distMatch[1]) || 'spade';
+
+    var emberFile = EmberDev.distros[dist];
+    if (!emberFile) { throw 'Unknown dist'; }
+
+    loadScript(emberFile);
+  </script>
+
+  <script type="text/javascript" src="ember-tests.js"></script>
+
+  <script type="text/javascript">
+    // Load Tests and Depenencies
+    var packages = (QUnit.urlParams.package || "all").split(","),
+        packageName, el, idx, len, re, match, moduleName;
+
+    if (packages[0] === 'all') {
+      packages = [<%= EmberDev.config.testing_packages.map{|p| "'#{p}'" }.join(', ') %>];
+    }
+
+    var newPackages = [],
+        skipPackages = (QUnit.urlParams.skipPackage || '').split(","),
+        skip;
+    for (var i=0; i<packages.length; i++) {
+      skip = false;
+      for (var k=0; k<skipPackages.length; k++) {
+        if (packages[i] === skipPackages[k]) {
+          skip = true;
+          break;
+        }
+      }
+      if (!skip) { newPackages.push(packages[i]); }
+    }
+    packages = newPackages;
+
+    len = packages.length;
+
+    <% if requires = EmberDev.config.testing_additional_requires %>
+      // There is no require for these in the code
+      if (dist == 'spade') {
+        <% requires.each do |req| %>
+          minispade.require('<%= req %>');
+        <% end %>
+      }
+    <% end %>
+
+    for (idx=0; idx<len; idx++) {
+      packageName = packages[idx];
+      re = new RegExp('^'+packageName+'/([^/]+)');
+
+      if (dist == 'spade') {
+        minispade.require(packageName);
+      }
+
+      try {
+        minispade.require(packageName+'/~test-setup');
+      } catch(e) { }
+
+      try {
+        minispade.require(packageName+'/~tests/helpers');
+      } catch(e) { }
+
+      for (moduleName in minispade.modules) {
+        if (!minispade.modules.hasOwnProperty(moduleName)) { continue; }
+
+        match = moduleName.match(re);
+        if (match) {
+          if (match[1] === '~tests') {
+            // Only require the actual tests since we already required the module
+            minispade.require(moduleName);
+          }
+
+          if (EmberDev.jsHint) {
+            // JSHint all modules in this package, tests and code
+            // (closure to preserve variable values)
+            (function() {
+              var jshintModule = moduleName;
+              module(jshintModule);
+              test('should pass jshint', function() {
+                var passed = JSHINT(minispade.modules[jshintModule], JSHINTRC),
+                    errors = EmberDev.jsHintReporter(jshintModule, JSHINT.errors);
+                ok(passed, jshintModule+" should pass jshint."+(errors ? "\n"+errors : ''));
+              });
+            })();
+          }
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>

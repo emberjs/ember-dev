@@ -12,34 +12,30 @@ namespace :ember do
     packages = Dir['packages/*/tests'].sort.map { |p| p.split('/')[1] }
 
     suites = {
-      :default  => packages.map{|p| "package=#{p}" },
-      :built    => [ "package=all&dist=build" ],
-      :runtime  => [ "package=ember-metal,ember-runtime" ],
-      :views    => [ "package=container,ember-views,ember-handlebars" ],
-      :standard => packages.map{|p| "package=#{p}" } +
-                    ["package=all&jquery=1.7.2&nojshint=true",
-                      "package=all&extendprototypes=true&nojshint=true",
-                      # container isn't publicly available in the built version
-                      "package=all&skipPackage=container&dist=build&nojshint=true"],
-      :all      => packages.map{|p| "package=#{p}" } +
-                    ["package=all&jquery=1.7.2&nojshint=true",
-                      "package=all&jquery=1.8.3&nojshint=true",
-                      "package=all&jquery=git&nojshint=true",
-                      "package=all&extendprototypes=true&nojshint=true",
-                      "package=all&extendprototypes=true&jquery=git&nojshint=true",
-                      # container isn't publicly available in the built version
-                      "package=all&skipPackage=container&dist=build&nojshint=true"]
+      'default'  => packages.map{|p| "package=#{p}" },
     }
 
     packages.each do |package|
-      suites[package.to_sym] = ["package=#{package}"]
+      suites[package] = ["package=#{package}"]
+    end
+
+    if EmberDev.config.testing_suites
+      suites.merge!(EmberDev.config.testing_suites)
+    end
+
+    # This is a bit of a hack
+    suites.each do |name, opts|
+      if idx = opts.index('EACH_PACKAGE')
+        opts[idx] = packages.map{|package| "package=#{package}" }
+        opts.flatten!
+      end
     end
 
     if ENV['TEST']
       opts = [ENV['TEST']]
     else
-      suite = args[:suite] || :default
-      opts = suites[suite.to_sym]
+      suite = args[:suite] || 'default'
+      opts = suites[suite]
     end
 
     unless opts

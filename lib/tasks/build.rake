@@ -1,12 +1,14 @@
 def pipeline
   require 'rake-pipeline'
-  Rake::Pipeline::Project.new(File.expand_path("../../ember-dev/assetfile.rb", __FILE__))
+  Rake::Pipeline::Project.new(EmberDev.config.assetfile)
 end
+
+config = EmberDev.config
 
 namespace :ember do
   desc "Build ember.js"
   task :dist do
-    puts "Building Ember..."
+    puts "Building #{config.name}..."
     pipeline.invoke
     puts "Done"
   end
@@ -15,7 +17,6 @@ namespace :ember do
   task :clean do
     puts "Cleaning build..."
     rm_rf "dist" # Make sure even things RakeP doesn't know about are cleaned
-    rm_f "tests/ember-tests.js"
     rm_rf "tmp"
     puts "Done"
   end

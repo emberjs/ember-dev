@@ -89,6 +89,10 @@
     </script>
   <% end %>
 
+  <% unless EmberDev.config.testing_ember %>
+    <script type="text/javascript" src="modules/ember.js"></script>
+  <% end %>
+
   <script>
     // Load ember distribution from query vars
     var distMatch = location.search.match(/dist=([^&]+)/),
@@ -99,6 +103,17 @@
 
     loadScript(emberFile);
   </script>
+
+  <% if requires = EmberDev.config.testing_additional_requires %>
+    <script type="text/javascript">
+      // There is no require for these in the code
+      if (dist == 'spade') {
+        <% requires.each do |req| %>
+          minispade.require('<%= req %>');
+        <% end %>
+      }
+    </script>
+  <% end %>
 
   <script type="text/javascript" src="ember-tests.js"></script>
 
@@ -127,15 +142,6 @@
     packages = newPackages;
 
     len = packages.length;
-
-    <% if requires = EmberDev.config.testing_additional_requires %>
-      // There is no require for these in the code
-      if (dist == 'spade') {
-        <% requires.each do |req| %>
-          minispade.require('<%= req %>');
-        <% end %>
-      }
-    <% end %>
 
     for (idx=0; idx<len; idx++) {
       packageName = packages[idx];

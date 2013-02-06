@@ -11,6 +11,7 @@ module EmberDev
     attr_accessor :testing_suites
     attr_accessor :testing_packages
     attr_accessor :testing_additional_requires
+    attr_accessor :testing_ember
 
     def initialize(hash)
       hash.each{|k,v| send("#{k}=", v) }

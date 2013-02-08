@@ -123,6 +123,7 @@ class EmberStub < Rake::Pipeline::Filter
       file = File.read(input.fullpath)
       out = "(function() {\nvar Ember = { assert: function() {} };\n"
       out << file
+      out << "\nexports.emberHandlebars = Ember.Handlebars;"
       out << "\nexports.precompile = Ember.Handlebars.precompile;"
       out << "\n})()"
       output.write out

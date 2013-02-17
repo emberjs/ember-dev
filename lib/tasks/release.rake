@@ -1,5 +1,3 @@
-EMBER_VERSION = File.read("VERSION").strip
-
 namespace :ember do
   namespace :release do
     def pretend?

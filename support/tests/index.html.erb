@@ -67,18 +67,18 @@
   </script>
 
   <script type="text/javascript">
-    var handlebarsVersion = QUnit.urlParams.handlebars || "1.0.0-rc.3";
 
-    // Fallback to default Handlebars
+    var handlebarsVersion = QUnit.urlParams.handlebars;
+
     if (handlebarsVersion !== 'none') {
-      loadScript('/lib/handlebars-'+handlebarsVersion+'.js');
+      loadScript('/handlebars.js');
     }
     // Close the script tag to make sure document.write happens
   </script>
 
   <script type="text/javascript">
     if (handlebarsVersion !== 'none' && !window.Handlebars) {
-      if (window.console && console.warn) { console.warn("Unable to load Handlebars "+handlebarsVersion+"."); }
+      if (window.console && console.warn) { console.warn("Unable to load Handlebars."); }
     }
     // Close the script tag to make sure document.write happens
   </script>

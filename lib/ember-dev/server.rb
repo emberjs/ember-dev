@@ -1,9 +1,24 @@
 require 'rake-pipeline'
 require 'rake-pipeline/middleware'
 require 'erb'
+require 'handlebars/source'
 
 module EmberDev
   class Server
+    class HandlebarsJS
+      def initialize(app)
+        @app = app
+      end
+
+      def call(env)
+        if env['PATH_INFO'] == '/handlebars.js'
+          [200, {'Content-Type' => 'text/javascript'}, [File.read(Handlebars::Source.bundled_path)]]
+        else
+          @app.call(env)
+        end
+      end
+    end
+
     class NoCache
       def initialize(app)
         @app = app
@@ -38,6 +53,7 @@ module EmberDev
       tests_root = File.expand_path("../../../support/tests", __FILE__)
 
       @app = Rack::Builder.app do
+        use HandlebarsJS
         use NoCache
         use Rake::Pipeline::Middleware, project
         use ErbIndex, tests_root

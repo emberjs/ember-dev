@@ -135,6 +135,7 @@ class EmberStub < Rake::Pipeline::Filter
 
       out << file
       out << "\nexports.precompile = Ember.Handlebars.precompile;"
+      out << "\nexports.EmberHandlebars = Ember.Handlebars;"
       out << "\n})();"
       output.write out
     end

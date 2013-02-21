@@ -1,6 +1,7 @@
 require "rake-pipeline-web-filters"
 require "json"
 require "execjs"
+require "handlebars/source"
 
 class EmberStripDebugMessagesFilter < Rake::Pipeline::Filter
   def strip_debug(data)
@@ -33,6 +34,15 @@ class HandlebarsPrecompiler < Rake::Pipeline::Filter
       unless @context
         contents = <<END
 exports = {};
+
+// This is necessary to browserify the ember-template-compiler node module,
+// which needs to `require('handlebars')`. A more complex solution may 
+// be desirable in the future if ember-template-compiler needs to require more modules.
+function require() {
+  #{File.read(Handlebars::Source.bundled_path)};
+  return Handlebars;
+}
+
 #{File.read("dist/ember-template-compiler.js")}
 function precompileEmberHandlebars(string) {
   return exports.precompile(string).toString();
@@ -122,9 +132,10 @@ class EmberStub < Rake::Pipeline::Filter
     inputs.each do |input|
       file = File.read(input.fullpath)
       out = "(function() {\nvar Ember = { assert: function() {} };\n"
+
       out << file
       out << "\nexports.precompile = Ember.Handlebars.precompile;"
-      out << "\n})()"
+      out << "\n})();"
       output.write out
     end
   end

@@ -90,7 +90,10 @@
   <% end %>
 
   <% unless EmberDev.config.testing_ember %>
-    <script type="text/javascript" src="modules/ember.js"></script>
+    <script type="text/javascript">
+      loadScript('/ember.js');
+      // Close the script tag to make sure document.write happens
+    </script>
   <% end %>
 
   <script>

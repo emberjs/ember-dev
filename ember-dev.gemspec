@@ -26,5 +26,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency "grit"
   gem.add_dependency "execjs"
   gem.add_dependency "handlebars-source"
+  gem.add_dependency "ember-source"
 end
 

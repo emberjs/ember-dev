@@ -68,10 +68,14 @@ module EmberDev
       tests_root = File.expand_path("../../../support/tests", __FILE__)
 
       @app = Rack::Builder.app do
+        use NoCache
+
+        use Rake::Pipeline::Middleware, project
+
+        # Include these after RakeP so we can serve from RakeP if available
         use HandlebarsJS
         use EmberJS
-        use NoCache
-        use Rake::Pipeline::Middleware, project
+
         use ErbIndex, tests_root
         run Rack::Directory.new(tests_root)
       end

@@ -141,3 +141,28 @@ class EmberStub < Rake::Pipeline::Filter
     end
   end
 end
+
+class EmberAddMicroLoader < Rake::Pipeline::Filter
+  LOADER = File.expand_path("../../../../support/assets/loader.js", __FILE__)
+
+  def initialize(options={}, &block)
+    super(&block)
+    @global = options[:global]
+  end
+
+  def generate_output(inputs, output)
+    output.write "(function() {\n" unless @global
+
+    output.write File.read(LOADER)
+
+    inputs.each do |input|
+      output.write input.read
+    end
+
+    output.write "\n})();\n" unless @global
+  end
+
+  def additional_dependencies(input)
+    [ LOADER ]
+  end
+end

@@ -1,5 +1,5 @@
 /**
- * QUnit v1.11.0pre - A JavaScript Unit Testing Framework
+ * QUnit v1.11.0 - A JavaScript Unit Testing Framework
  *
  * http://qunitjs.com
  *
@@ -43,24 +43,25 @@ var QUnit,
 	 * @param {String|Error} error
 	 * @return {String} error message
 	 */
-	errorString = function(error) {
-		var errorString = error.toString();
-		if (errorString.substring(0,7) === '[object') {
-			var name = error.name ? error.name.toString() : 'Error',
-				message = error.message ? error.message.toString() : '';
-			if (name && message) {
-				return name + ': ' + message;
-			} else if (name) {
+	errorString = function( error ) {
+		var name, message,
+			errorString = error.toString();
+		if ( errorString.substring( 0, 7 ) === "[object" ) {
+			name = error.name ? error.name.toString() : "Error";
+			message = error.message ? error.message.toString() : "";
+			if ( name && message ) {
+				return name + ": " + message;
+			} else if ( name ) {
 				return name;
-			} else if (message) {
+			} else if ( message ) {
 				return message;
 			} else {
-				return 'Error';
+				return "Error";
 			}
 		} else {
 			return errorString;
 		}
-	};
+	},
 	/**
 	 * Makes a clone of an object using only Array or Object as base,
 	 * and copies over the own enumerable properties.
@@ -990,7 +991,8 @@ extend( QUnit, {
 			querystring += encodeURIComponent( key ) + "=" +
 				encodeURIComponent( params[ key ] ) + "&";
 		}
-		return window.location.pathname + querystring.slice( 0, -1 );
+		return window.location.protocol + "//" + window.location.host +
+			window.location.pathname + querystring.slice( 0, -1 );
 	},
 
 	extend: extend,
@@ -1496,12 +1498,12 @@ function extend( a, b ) {
  * @param {Function} fn
  */
 function addEvent( elem, type, fn ) {
+	// Standards-based browsers
 	if ( elem.addEventListener ) {
 		elem.addEventListener( type, fn, false );
-	} else if ( elem.attachEvent ) {
-		elem.attachEvent( "on" + type, fn );
+	// IE
 	} else {
-		fn(); // WTF
+		elem.attachEvent( "on" + type, fn );
 	}
 }
 
@@ -2014,7 +2016,7 @@ QUnit.diff = (function() {
 			os = {};
 
 		for ( i = 0; i < n.length; i++ ) {
-			if ( ns[ n[i] ] == null ) {
+			if ( !hasOwn.call( ns, n[i] ) ) {
 				ns[ n[i] ] = {
 					rows: [],
 					o: null
@@ -2024,7 +2026,7 @@ QUnit.diff = (function() {
 		}
 
 		for ( i = 0; i < o.length; i++ ) {
-			if ( os[ o[i] ] == null ) {
+			if ( !hasOwn.call( os, o[i] ) ) {
 				os[ o[i] ] = {
 					rows: [],
 					n: null
@@ -2037,7 +2039,7 @@ QUnit.diff = (function() {
 			if ( !hasOwn.call( ns, i ) ) {
 				continue;
 			}
-			if ( ns[i].rows.length === 1 && os[i] !== undefined && os[i].rows.length === 1 ) {
+			if ( ns[i].rows.length === 1 && hasOwn.call( os, i ) && os[i].rows.length === 1 ) {
 				n[ ns[i].rows[0] ] = {
 					text: n[ ns[i].rows[0] ],
 					row: os[i].rows[0]
@@ -2148,4 +2150,3 @@ if ( typeof exports !== "undefined" ) {
 
 // get at whatever the global object is, like window in browsers
 }( (function() {return this;}.call()) ));
-

@@ -2,6 +2,7 @@ module EmberDev
   autoload :Config,  'ember-dev/config'
   autoload :Server,  'ember-dev/server'
   autoload :Version, 'ember-dev/version'
+  autoload :Publish ,'ember-dev/publish'
 
   def self.config
     @@config ||= Config.from_file('ember-dev.yml')

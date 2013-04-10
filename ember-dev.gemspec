@@ -27,5 +27,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency "execjs"
   gem.add_dependency "handlebars-source"
   gem.add_dependency "ember-source"
+  gem.add_dependency "aws-sdk"
 end
 

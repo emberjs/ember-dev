@@ -16,17 +16,19 @@ module EmberDev
         :secret_access_key => secret_access_key)
       bucket = s3.buckets[bucket_name]
       files.each do |file|
-        filename = file.split('.js').first.split('/').last
-        minified_files = []
-        unminified_files = []
-        unminified_files << bucket.objects["#{filename}-latest.js"]
-        unminified_files << bucket.objects["#{filename}-#{rev}.js"]
-        minified_files << bucket.objects["#{filename}-latest.min.js"]
-        minified_files << bucket.objects["#{filename}-#{rev}.min.js"]
-        unminified_files.each { |obj| obj.write Pathname.new file }
-        minified_files.each { |obj|
-          obj.write Pathname.new file.sub("/#{filename}.js$", filename + '.min.js')
-        }
+        basename = Pathname.new(file).basename.sub_ext('')
+        unminified_targets = [
+          bucket.objects["#{basename}-latest.js"],
+          bucket.objects["#{basename}-#{rev}.js"]
+        ]
+        unminified_targets.each { |obj| obj.write(Pathname.new(file)) }
+
+        minified_source = file.sub(/#{basename}.js$/, "#{basename}.min.js")
+        minified_targets = [
+          bucket.objects["#{basename}-latest.min.js"],
+          bucket.objects["#{basename}-#{rev}.min.js"]
+        ]
+        minified_targets.each { |obj| obj.write(Pathname.new(minified_source)) }
       end
     end
 

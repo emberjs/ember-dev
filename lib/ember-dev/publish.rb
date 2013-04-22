@@ -7,6 +7,7 @@ module EmberDev
       secret_access_key = opts.fetch :secret_access_key
       bucket_name = opts.fetch :bucket_name
       files = opts.fetch :files
+      subdirectory = opts[:subdirectory] ? opts[:subdirectory] + '/' : ''
       rev=`git rev-list HEAD -n 1`.to_s.strip
       master_rev = `git rev-list origin/master -n 1`.to_s.strip
       return unless rev == master_rev
@@ -20,14 +21,15 @@ module EmberDev
         unminified_targets = [
           bucket.objects["#{basename}-latest.js"],
           bucket.objects["#{basename}-#{rev}.js"]
-        ]
+        ].map { |file| subdirectory + file }
         unminified_targets.each { |obj| obj.write(Pathname.new(file)) }
-
         minified_source = file.sub(/#{basename}.js$/, "#{basename}.min.js")
         minified_targets = [
           bucket.objects["#{basename}-latest.min.js"],
           bucket.objects["#{basename}-#{rev}.min.js"]
-        ]
+        ].map { |file| subdirectory + file }
+        prod = bucket.objects["#{subdirectory + basename}.prod.js"]
+        prod.write Pathname.new file.sub(/#{basename}.js$/, "#{basename}.prod.js")
         minified_targets.each { |obj| obj.write(Pathname.new(minified_source)) }
       end
     end

@@ -25,7 +25,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency "kicker"
   gem.add_dependency "grit"
   gem.add_dependency "execjs"
-  gem.add_dependency "handlebars-source", [">= 1.0.0.rc3", "< 1.0.0.rc4"]
   gem.add_dependency "ember-source"
   gem.add_dependency "aws-sdk"
 end

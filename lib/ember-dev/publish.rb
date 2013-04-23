@@ -19,16 +19,16 @@ module EmberDev
       files.each do |file|
         basename = Pathname.new(file).basename.sub_ext('')
         unminified_targets = [
-          bucket.objects["#{basename}-latest.js"],
-          bucket.objects["#{basename}-#{rev}.js"]
-        ].map { |file| subdirectory + file }
+          "#{basename}-latest.js",
+          "#{basename}-#{rev}.js"
+        ].map { |file| bucket.objects[subdirectory + file] }
         unminified_targets.each { |obj| obj.write(Pathname.new(file)) }
         minified_source = file.sub(/#{basename}.js$/, "#{basename}.min.js")
         minified_targets = [
-          bucket.objects["#{basename}-latest.min.js"],
-          bucket.objects["#{basename}-#{rev}.min.js"]
-        ].map { |file| subdirectory + file }
-        prod = bucket.objects["#{subdirectory + basename}.prod.js"]
+          "#{basename}-latest.min.js",
+          "#{basename}-#{rev}.min.js"
+        ].map { |file| bucket.objects[subdirectory + file] }
+        prod = bucket.objects["#{subdirectory}#{basename}.prod.js"]
         prod.write Pathname.new file.sub(/#{basename}.js$/, "#{basename}.prod.js")
         minified_targets.each { |obj| obj.write(Pathname.new(minified_source)) }
       end

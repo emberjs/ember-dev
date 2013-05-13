@@ -1,3 +1,5 @@
+require 'pathname'
+
 module EmberDev
   autoload :Config,  'ember-dev/config'
   autoload :Server,  'ember-dev/server'

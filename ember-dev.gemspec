@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["peter.wagenet@gmail.com"]
   gem.description   = "Ember Package Development Tooling"
   gem.summary       = "Tooling for developing Ember packages."
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/emberjs/ember-dev"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")

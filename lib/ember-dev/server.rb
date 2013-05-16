@@ -1,8 +1,6 @@
 require 'rake-pipeline'
 require 'rake-pipeline/middleware'
 require 'erb'
-require 'handlebars/source'
-require 'ember/source'
 
 module EmberDev
   class Server

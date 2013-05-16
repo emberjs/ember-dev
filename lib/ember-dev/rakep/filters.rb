@@ -12,7 +12,7 @@ class EmberStripDebugMessagesFilter < Rake::Pipeline::Filter
   def add_localhost_warning(data)
     data << "\n\n" + <<END
 if (typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-  console.warn("You are running a production build of Ember on localhost and won't receive detailed error messages. "+
+  Ember.Logger.warn("You are running a production build of Ember on localhost and won't receive detailed error messages. "+
                "If you want full error messages please use the non-minified build provided on the Ember website.");
 }
 END

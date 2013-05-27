@@ -15,7 +15,7 @@ def setup_uploads
     mkdir_p 'tmp'
 
     # TODO: See if we can only fetch the branches we need
-    system("git clone #{remote['url']} tmp/dist")
+    sh("git clone #{remote['url']} tmp/dist")
   end
 end
 
@@ -25,12 +25,12 @@ namespace :ember do
     setup_uploads
 
     Dir.chdir "tmp/dist" do
-      system("git checkout latest-builds")
-      cp "../../dist/ember.js", ".", :verbose => false
-      cp "../../dist/ember.min.js", ".", :verbose => false
-      system("git add ember.js ember.min.js")
-      system('git commit --amend --reset-author -m "Latest Builds"')
-      system("git push -f origin latest-builds") unless ENV['PRETEND']
+      sh("git checkout latest-builds")
+      cp("../../dist/ember.js", ".", :verbose => false)
+      cp("../../dist/ember.min.js", ".", :verbose => false)
+      sh("git add ember.js ember.min.js")
+      sh('git commit --amend --reset-author -m "Latest Builds"')
+      sh("git push -f origin latest-builds") unless ENV['PRETEND']
     end
   end
 end

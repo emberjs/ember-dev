@@ -3,7 +3,7 @@ namespace :ember do
   task :strip_whitespace do
     Dir["packages/**/*.js"].each do |name|
       body = File.read(name)
-      File.open(name, "w") do |file|
+      open(name, "w") do |file|
         file.write body.gsub(/ +\n/, "\n")
       end
     end

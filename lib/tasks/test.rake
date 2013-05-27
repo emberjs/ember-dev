@@ -5,7 +5,7 @@ namespace :ember do
     require "webrick"
     require "colored"
 
-    unless system("which phantomjs > /dev/null 2>&1")
+    unless sh("which phantomjs > /dev/null 2>&1")
       abort "PhantomJS is not installed. Download from http://phantomjs.org"
     end
 
@@ -55,14 +55,14 @@ namespace :ember do
 
       test_path = File.expand_path("../../../support/tests", __FILE__)
       cmd = "phantomjs #{test_path}/qunit/run-qunit.js \"http://localhost:9999/?#{opt}\""
-      system(cmd)
+      sh(cmd)
 
       # A bit of a hack until we can figure this out on Travis
       tries = 0
       while tries < 3 && $?.exitstatus === 124
         tries += 1
         puts "\nTimed Out. Trying again...\n"
-        system(cmd)
+        sh(cmd)
       end
 
       success &&= $?.success?
@@ -81,6 +81,6 @@ namespace :ember do
 
   desc "Automatically run tests (Mac OS X only)"
   task :autotest do
-    system("kicker -e 'rake test' packages")
+    sh("kicker -e 'rake test' packages")
   end
 end

@@ -42,8 +42,8 @@ namespace :ember do
 
     repo.remote_fetch username
 
-    `git checkout -B testing-#{username}-#{branch} master`
-    `git merge #{username}/#{branch}`
+    sh('git checkout -B testing-#{username}-#{branch} master')
+    sh('git merge #{username}/#{branch}')
 
     puts "Resolve possible merge conflicts and run `rake dist`"
   end

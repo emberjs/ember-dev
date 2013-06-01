@@ -14,7 +14,7 @@ namespace :ember do
 
     desc "Update Changelog"
     task :changelog do
-      last_tag = `'git describe --tags --abbrev=0'`.strip
+      last_tag = `git describe --tags --abbrev=0`.strip
       puts "Getting Changes since #{last_tag}"
 
       cmd = "git log #{last_tag}..HEAD --format='* %s'"

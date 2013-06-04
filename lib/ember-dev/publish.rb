@@ -2,9 +2,8 @@ require 'aws-sdk'
 
 module EmberDev
   module Publish
-    include self;
 
-    def to_s3(opts={})
+    def self.to_s3(opts={})
       files = opts.fetch(:files)
       bucket_name = opts.fetch(:bucket_name)
       access_key_id = opts.fetch(:access_key_id)

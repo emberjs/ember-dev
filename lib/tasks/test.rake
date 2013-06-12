@@ -42,11 +42,12 @@ namespace :ember do
       abort "No suite named: #{suite}"
     end
 
+    port = ENV['TEST_SERVER_PORT'] || 60099
     server = Thread.new do
       Rack::Server.start(:config => "config.ru",
                          :Logger => WEBrick::Log.new("/dev/null"),
                          :AccessLog => [],
-                         :Port => 9999)
+                         :Port => port)
     end
 
     begin
@@ -55,7 +56,7 @@ namespace :ember do
         puts "\n"
 
         test_path = File.expand_path("../../../support/tests", __FILE__)
-        cmd = "phantomjs #{test_path}/qunit/run-qunit.js \"http://localhost:9999/?#{opt}\""
+        cmd = "phantomjs #{test_path}/qunit/run-qunit.js \"http://localhost:#{port}/?#{opt}\""
         sh(cmd)
 
         # A bit of a hack until we can figure this out on Travis

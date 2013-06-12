@@ -42,34 +42,35 @@ namespace :ember do
       abort "No suite named: #{suite}"
     end
 
-    server = fork do
+    server = Thread.new do
       Rack::Server.start(:config => "config.ru",
                          :Logger => WEBrick::Log.new("/dev/null"),
                          :AccessLog => [],
                          :Port => 9999)
     end
 
-    success = true
-    opts.each do |opt|
-      puts "\n"
+    begin
+      success = true
+      opts.each do |opt|
+        puts "\n"
 
-      test_path = File.expand_path("../../../support/tests", __FILE__)
-      cmd = "phantomjs #{test_path}/qunit/run-qunit.js \"http://localhost:9999/?#{opt}\""
-      sh(cmd)
-
-      # A bit of a hack until we can figure this out on Travis
-      tries = 0
-      while tries < 3 && $?.exitstatus === 124
-        tries += 1
-        puts "\nTimed Out. Trying again...\n"
+        test_path = File.expand_path("../../../support/tests", __FILE__)
+        cmd = "phantomjs #{test_path}/qunit/run-qunit.js \"http://localhost:9999/?#{opt}\""
         sh(cmd)
+
+        # A bit of a hack until we can figure this out on Travis
+        tries = 0
+        while tries < 3 && $?.exitstatus === 124
+          tries += 1
+          puts "\nTimed Out. Trying again...\n"
+          sh(cmd)
+        end
+
+        success &&= $?.success?
       end
-
-      success &&= $?.success?
+    ensure
+      server.kill
     end
-
-    Process.kill(:SIGINT, server)
-    Process.wait
 
     if success
       puts "\nTests Passed".green

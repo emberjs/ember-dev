@@ -50,7 +50,7 @@
 
   <script type="text/javascript">
     // Load custom version of jQuery if possible (assign to window so IE8 can use in later blocks)
-    var jQueryVersion = QUnit.urlParams.jquery || "1.9.0";
+    var jQueryVersion = QUnit.urlParams.jquery || "1.10.2";
     if (jQueryVersion !== 'none') {
       loadScript('http://code.jquery.com/jquery-'+jQueryVersion+'.js');
     }
@@ -61,7 +61,7 @@
     // Fallback to default jQuery
     if (jQueryVersion !== 'none' && !window.jQuery) {
       if (window.console && console.warn) { console.warn("Unable to load jQuery "+jQueryVersion+". Using default."); }
-      loadScript('jquery-1.9.0.js');
+      loadScript('jquery-1.10.2.js');
     }
     // Close the script tag to make sure document.write happens
   </script>

@@ -4,11 +4,14 @@ require_relative 'publish'
 module EmberDev
   module Publish
     class Asset
-      attr_accessor :file, :current_revision
+      attr_accessor :file, :current_revision, :current_tag
 
-      def initialize(filename, current_revision = EmberDev::Publish.current_revision)
+      def initialize(filename, options = nil)
+        options              ||= {}
+
         self.file             = Pathname.new(filename)
-        self.current_revision = current_revision
+        self.current_revision = options.fetch(:revision) { EmberDev::Publish.current_revision }
+        self.current_tag      = options.fetch(:tag)      { EmberDev::Publish.current_tag }
       end
 
       def basename
@@ -19,9 +22,20 @@ module EmberDev
         file
       end
 
+      def has_tag
+        current_tag.to_s != ''
+      end
+
+      def targets_for(extension)
+        latest_path   = "latest/#{basename}#{extension}"
+        revision_path = "shas/#{current_revision}/#{basename}#{extension}"
+        tagged_path   = has_tag ? "#{current_tag}/#{basename}#{extension}" : nil
+
+        [latest_path, revision_path, tagged_path].compact
+      end
+
       def unminified_targets
-        ["latest/#{basename}.js",
-         "shas/#{current_revision}/#{basename}.js"]
+        targets_for('.js')
       end
 
       def minified_source
@@ -29,8 +43,7 @@ module EmberDev
       end
 
       def minified_targets
-        ["latest/#{basename}.min.js",
-         "shas/#{current_revision}/#{basename}.min.js"]
+        targets_for('.min.js')
       end
 
       def production_source
@@ -38,8 +51,7 @@ module EmberDev
       end
 
       def production_targets
-        ["latest/#{basename}.prod.js",
-         "shas/#{current_revision}/#{basename}.prod.js"]
+        targets_for('.prod.js')
       end
 
       def files_for_publishing

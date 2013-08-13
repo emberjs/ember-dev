@@ -5,6 +5,10 @@ require_relative 'asset'
 module EmberDev
   module Publish
 
+    def self.current_tag
+      `git tag --points-at #{current_revision}`.to_s.strip
+    end
+
     def self.current_revision
       @current_revision ||= `git rev-list HEAD -n 1`.to_s.strip
     end

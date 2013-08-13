@@ -21,19 +21,19 @@ describe EmberDev::Publish::Asset do
   it "returns a list of unminified_targets" do
     asset_file = described_class.new('some_dir/ember.js', 'BLAHBLAH')
 
-    assert_equal %w{latest/ember.js BLAHBLAH/ember.js}, asset_file.unminified_targets
+    assert_equal %w{latest/ember.js shas/BLAHBLAH/ember.js}, asset_file.unminified_targets
   end
 
   it "returns a list of minified_targets" do
     asset_file = described_class.new('ember.js', 'BLAHBLAH')
 
-    assert_equal %w{latest/ember.min.js BLAHBLAH/ember.min.js}, asset_file.minified_targets
+    assert_equal %w{latest/ember.min.js shas/BLAHBLAH/ember.min.js}, asset_file.minified_targets
   end
 
   it "returns a list of production_targets" do
     asset_file = described_class.new('ember.js', 'BLAHBLAH')
 
-    assert_equal %w{latest/ember.prod.js BLAHBLAH/ember.prod.js}, asset_file.production_targets
+    assert_equal %w{latest/ember.prod.js shas/BLAHBLAH/ember.prod.js}, asset_file.production_targets
   end
 
   it "knows the location of it's minified source" do
@@ -62,9 +62,9 @@ describe EmberDev::Publish::Asset do
     rev  = "GRRRRR"
 
     expected_hash = {
-      Pathname.new("#{dir}/#{base}.js")      => ["latest/#{base}.js",      "#{rev}/#{base}.js"],
-      Pathname.new("#{dir}/#{base}.min.js")  => ["latest/#{base}.min.js",  "#{rev}/#{base}.min.js"],
-      Pathname.new("#{dir}/#{base}.prod.js") => ["latest/#{base}.prod.js", "#{rev}/#{base}.prod.js"],
+      Pathname.new("#{dir}/#{base}.js")      => ["latest/#{base}.js",      "shas/#{rev}/#{base}.js"],
+      Pathname.new("#{dir}/#{base}.min.js")  => ["latest/#{base}.min.js",  "shas/#{rev}/#{base}.min.js"],
+      Pathname.new("#{dir}/#{base}.prod.js") => ["latest/#{base}.prod.js", "shas/#{rev}/#{base}.prod.js"],
     }
     asset_file = described_class.new("#{dir}/#{base}.js", rev)
 

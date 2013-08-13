@@ -21,7 +21,7 @@ module EmberDev
 
       def unminified_targets
         ["latest/#{basename}.js",
-         "#{current_revision}/#{basename}.js"]
+         "shas/#{current_revision}/#{basename}.js"]
       end
 
       def minified_source
@@ -30,7 +30,7 @@ module EmberDev
 
       def minified_targets
         ["latest/#{basename}.min.js",
-         "#{current_revision}/#{basename}.min.js"]
+         "shas/#{current_revision}/#{basename}.min.js"]
       end
 
       def production_source
@@ -39,7 +39,7 @@ module EmberDev
 
       def production_targets
         ["latest/#{basename}.prod.js",
-         "#{current_revision}/#{basename}.prod.js"]
+         "shas/#{current_revision}/#{basename}.prod.js"]
       end
 
       def files_for_publishing

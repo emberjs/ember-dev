@@ -19,16 +19,24 @@ describe EmberDev::Publish::Asset do
   end
 
   describe "#targets_for" do
+    let(:base_targets) { %w{latest/ember.js shas/BLAHBLAH/ember.js} }
+
     it "doesn't return the tagged_path if no tag is present" do
       asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: '')
 
-      assert_equal %w{latest/ember.js shas/BLAHBLAH/ember.js}, asset_file.targets_for('.js')
+      assert_equal base_targets, asset_file.targets_for('.js')
     end
 
     it "includes a tagged path if a tag is present" do
       asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999')
 
-      assert_equal %w{latest/ember.js shas/BLAHBLAH/ember.js v999/ember.js}, asset_file.targets_for('.js')
+      assert_equal base_targets + ['v999/ember.js'], asset_file.targets_for('.js')
+    end
+
+    it "includes stable path if a stable => true" do
+      asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999', stable: true)
+
+      assert_equal base_targets + %w{v999/ember.js stable/ember.js}, asset_file.targets_for('.js')
     end
   end
 

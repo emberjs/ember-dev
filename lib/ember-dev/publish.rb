@@ -53,7 +53,7 @@ module EmberDev
 
     # returns a pathname to the gzipped version of the file
     def self.gzip(file)
-      gzipped_name = file + '.gz'
+      gzipped_name = file.sub_ext('.js.gz')
       File.open(gzipped_name, 'w') do |f|
         writer = Zlib::GzipWriter.new(f,9)
         writer.write File.read(file)

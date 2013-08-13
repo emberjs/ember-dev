@@ -4,7 +4,7 @@ require_relative 'publish'
 module EmberDev
   module Publish
     class Asset
-      attr_accessor :file, :current_revision, :current_tag
+      attr_accessor :file, :current_revision, :current_tag, :stable
 
       def initialize(filename, options = nil)
         options              ||= {}
@@ -12,6 +12,7 @@ module EmberDev
         self.file             = Pathname.new(filename)
         self.current_revision = options.fetch(:revision) { EmberDev::Publish.current_revision }
         self.current_tag      = options.fetch(:tag)      { EmberDev::Publish.current_tag }
+        self.stable           = options.fetch(:stable)   { false }
       end
 
       def basename
@@ -26,12 +27,17 @@ module EmberDev
         current_tag.to_s != ''
       end
 
+      def stable
+        @stable && @stable.to_s != ''
+      end
+
       def targets_for(extension)
         latest_path   = "latest/#{basename}#{extension}"
         revision_path = "shas/#{current_revision}/#{basename}#{extension}"
         tagged_path   = has_tag ? "#{current_tag}/#{basename}#{extension}" : nil
+        stable_path   = stable ? "stable/#{basename}#{extension}" : nil
 
-        [latest_path, revision_path, tagged_path].compact
+        [latest_path, revision_path, tagged_path, stable_path].compact
       end
 
       def unminified_targets

@@ -53,7 +53,7 @@ namespace :ember do
 
         # Bump ember-metal/core version
         contents = File.read("packages/ember-metal/lib/core.js")
-        current_version = contents.match(/@version ([\w\.-]+)/) && $1
+        current_version = contents.match(/Ember.VERSION = '([\w\.-]+)';$/) && $1
         contents.gsub!(current_version, PROJECT_VERSION);
 
         open("packages/ember-metal/lib/core.js", "w") do |file|

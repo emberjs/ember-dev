@@ -1,4 +1,5 @@
 require 'aws-sdk'
+require 'zlib'
 
 module EmberDev
   module Publish
@@ -8,6 +9,7 @@ module EmberDev
       bucket_name = opts.fetch(:bucket_name)
       access_key_id = opts.fetch(:access_key_id)
       secret_access_key = opts.fetch(:secret_access_key)
+      excluded_minified_files = opts[:exclude_minified] || []
 
       subdirectory = opts[:subdirectory] ? opts[:subdirectory] + '/' : ''
 
@@ -19,23 +21,30 @@ module EmberDev
       return unless access_key_id && secret_access_key && bucket_name
 
       s3 = AWS::S3.new(
-        access_key_id: access_key_id,
-        secret_access_key: secret_access_key)
+        :access_key_id     =>  access_key_id,
+        :secret_access_key => secret_access_key)
 
       bucket = s3.buckets[bucket_name]
 
+      s3_options = {
+        :content_type     => 'text/javascript',
+        :content_encoding => 'gzip'
+      }
+
       files.each do |file|
+        gzipped_file = gzip(file)
+
         basename = Pathname.new(file).basename.sub_ext('')
 
         unminified_targets = [
           "#{basename}-latest.js",
           "#{basename}-#{rev}.js"
-        ].map do |file|
-          bucket.objects[subdirectory + file]
+        ].map do |f|
+          bucket.objects[subdirectory + f]
         end
 
         unminified_targets.each do |obj|
-          obj.write(Pathname.new(file))
+          obj.write(gzipped_file, s3_options)
         end
 
         minified_source = file.sub(/#{basename}.js$/, "#{basename}.min.js")
@@ -43,18 +52,33 @@ module EmberDev
         minified_targets = [
           "#{basename}-latest.min.js",
           "#{basename}-#{rev}.min.js"
-        ].map do |file|
-          bucket.objects[subdirectory + file]
+        ].map do |f|
+          bucket.objects[subdirectory + f]
+        end
+
+        unless excluded_minified_files.include?(file)
+          minified_targets.each do |obj|
+            gzipped_minified = gzip(minified_source)
+            obj.write(Pathname.new(gzipped_minified), s3_options)
+          end
         end
 
         prod = bucket.objects["#{subdirectory}#{basename}.prod.js"]
-        prod.write Pathname.new file.sub(/#{basename}.js$/, "#{basename}.prod.js")
-
-        minified_targets.each do |obj|
-          obj.write(Pathname.new(minified_source))
-        end
+        prod.write gzip(file.sub(/#{basename}.js$/, "#{basename}.prod.js")), s3_options
       end
     end
+
+    # returns a pathname to the gzipped version of the file
+    def self.gzip(file)
+      gzipped_name = file + '.gz'
+      File.open(gzipped_name, 'w') do |f|
+        writer = Zlib::GzipWriter.new(f,9)
+        writer.write File.read(file)
+        writer.close
+      end
+      Pathname.new(gzipped_name)
+    end
+
   end
 end
 

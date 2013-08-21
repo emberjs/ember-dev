@@ -30,13 +30,13 @@ describe EmberDev::Publish::Asset do
     it "includes a tagged path if a tag is present" do
       asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999')
 
-      assert_equal base_targets + ['v999/ember.js'], asset_file.targets_for('.js')
+      assert_equal base_targets + ['tags/v999/ember.js'], asset_file.targets_for('.js')
     end
 
     it "includes stable path if a stable => true" do
       asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999', stable: true)
 
-      assert_equal base_targets + %w{v999/ember.js stable/ember.js}, asset_file.targets_for('.js')
+      assert_equal base_targets + %w{tags/v999/ember.js stable/ember.js}, asset_file.targets_for('.js')
     end
   end
 
@@ -98,9 +98,9 @@ describe EmberDev::Publish::Asset do
       tag = 'v999'
 
       expected_hash = {
-        Pathname.new("#{dir}/#{base}.js")      => ["latest/#{base}.js",      "shas/#{rev}/#{base}.js",      "#{tag}/#{base}.js"],
-        Pathname.new("#{dir}/#{base}.min.js")  => ["latest/#{base}.min.js",  "shas/#{rev}/#{base}.min.js",  "#{tag}/#{base}.min.js"],
-        Pathname.new("#{dir}/#{base}.prod.js") => ["latest/#{base}.prod.js", "shas/#{rev}/#{base}.prod.js", "#{tag}/#{base}.prod.js"],
+        Pathname.new("#{dir}/#{base}.js")      => ["latest/#{base}.js",      "shas/#{rev}/#{base}.js",      "tags/#{tag}/#{base}.js"],
+        Pathname.new("#{dir}/#{base}.min.js")  => ["latest/#{base}.min.js",  "shas/#{rev}/#{base}.min.js",  "tags/#{tag}/#{base}.min.js"],
+        Pathname.new("#{dir}/#{base}.prod.js") => ["latest/#{base}.prod.js", "shas/#{rev}/#{base}.prod.js", "tags/#{tag}/#{base}.prod.js"],
       }
       asset_file = described_class.new("#{dir}/#{base}.js", revision: rev, tag: tag)
 

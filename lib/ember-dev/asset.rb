@@ -34,7 +34,7 @@ module EmberDev
       def targets_for(extension)
         latest_path   = "latest/#{basename}#{extension}"
         revision_path = "shas/#{current_revision}/#{basename}#{extension}"
-        tagged_path   = has_tag ? "#{current_tag}/#{basename}#{extension}" : nil
+        tagged_path   = has_tag ? "tags/#{current_tag}/#{basename}#{extension}" : nil
         stable_path   = stable ? "stable/#{basename}#{extension}" : nil
 
         [latest_path, revision_path, tagged_path, stable_path].compact

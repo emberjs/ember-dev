@@ -19,7 +19,7 @@ describe EmberDev::Publish::Asset do
   end
 
   describe "#targets_for" do
-    let(:base_targets) { %w{latest/ember.js shas/BLAHBLAH/ember.js} }
+    let(:base_targets) { %w{ember-latest.js latest/ember.js shas/BLAHBLAH/ember.js} }
 
     it "doesn't return the tagged_path if no tag is present" do
       asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: '')
@@ -43,19 +43,19 @@ describe EmberDev::Publish::Asset do
   it "returns a list of unminified_targets" do
     asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH')
 
-    assert_equal %w{latest/ember.js shas/BLAHBLAH/ember.js}, asset_file.unminified_targets
+    assert_equal %w{ember-latest.js latest/ember.js shas/BLAHBLAH/ember.js}, asset_file.unminified_targets
   end
 
   it "returns a list of minified_targets" do
     asset_file = described_class.new('ember.js', revision: 'BLAHBLAH')
 
-    assert_equal %w{latest/ember.min.js shas/BLAHBLAH/ember.min.js}, asset_file.minified_targets
+    assert_equal %w{ember-latest.min.js latest/ember.min.js shas/BLAHBLAH/ember.min.js}, asset_file.minified_targets
   end
 
   it "returns a list of production_targets" do
     asset_file = described_class.new('ember.js', revision: 'BLAHBLAH')
 
-    assert_equal %w{latest/ember.prod.js shas/BLAHBLAH/ember.prod.js}, asset_file.production_targets
+    assert_equal %w{ember-latest.prod.js latest/ember.prod.js shas/BLAHBLAH/ember.prod.js}, asset_file.production_targets
   end
 
   it "knows the location of it's minified source" do
@@ -85,9 +85,9 @@ describe EmberDev::Publish::Asset do
 
     it "doesn't include a tagged release if tag is empty/nil" do
       expected_hash = {
-        Pathname.new("#{dir}/#{base}.js")      => ["latest/#{base}.js",      "shas/#{rev}/#{base}.js"],
-        Pathname.new("#{dir}/#{base}.min.js")  => ["latest/#{base}.min.js",  "shas/#{rev}/#{base}.min.js"],
-        Pathname.new("#{dir}/#{base}.prod.js") => ["latest/#{base}.prod.js", "shas/#{rev}/#{base}.prod.js"],
+        Pathname.new("#{dir}/#{base}.js")      => ["#{base}-latest.js",      "latest/#{base}.js",      "shas/#{rev}/#{base}.js"],
+        Pathname.new("#{dir}/#{base}.min.js")  => ["#{base}-latest.min.js",  "latest/#{base}.min.js",  "shas/#{rev}/#{base}.min.js"],
+        Pathname.new("#{dir}/#{base}.prod.js") => ["#{base}-latest.prod.js", "latest/#{base}.prod.js", "shas/#{rev}/#{base}.prod.js"],
       }
       asset_file = described_class.new("#{dir}/#{base}.js", revision: rev, tag: '')
 
@@ -98,9 +98,9 @@ describe EmberDev::Publish::Asset do
       tag = 'v999'
 
       expected_hash = {
-        Pathname.new("#{dir}/#{base}.js")      => ["latest/#{base}.js",      "shas/#{rev}/#{base}.js",      "tags/#{tag}/#{base}.js"],
-        Pathname.new("#{dir}/#{base}.min.js")  => ["latest/#{base}.min.js",  "shas/#{rev}/#{base}.min.js",  "tags/#{tag}/#{base}.min.js"],
-        Pathname.new("#{dir}/#{base}.prod.js") => ["latest/#{base}.prod.js", "shas/#{rev}/#{base}.prod.js", "tags/#{tag}/#{base}.prod.js"],
+        Pathname.new("#{dir}/#{base}.js")      => ["#{base}-latest.js",      "latest/#{base}.js",      "shas/#{rev}/#{base}.js",      "tags/#{tag}/#{base}.js"],
+        Pathname.new("#{dir}/#{base}.min.js")  => ["#{base}-latest.min.js",  "latest/#{base}.min.js",  "shas/#{rev}/#{base}.min.js",  "tags/#{tag}/#{base}.min.js"],
+        Pathname.new("#{dir}/#{base}.prod.js") => ["#{base}-latest.prod.js", "latest/#{base}.prod.js", "shas/#{rev}/#{base}.prod.js", "tags/#{tag}/#{base}.prod.js"],
       }
       asset_file = described_class.new("#{dir}/#{base}.js", revision: rev, tag: tag)
 

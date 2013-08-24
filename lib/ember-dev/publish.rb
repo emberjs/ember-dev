@@ -41,7 +41,7 @@ module EmberDev
         end
 
         unminified_targets.each do |obj|
-          obj.write(file, s3_options)
+          open(file) { |f| obj.write(f.read, s3_options) }
         end
 
         minified_source = file.sub(/#{basename}.js$/, "#{basename}.min.js")

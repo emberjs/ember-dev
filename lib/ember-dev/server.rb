@@ -31,6 +31,20 @@ module EmberDev
         end
       end
     end
+    
+    class EmberData
+      def initialize(app)
+        @app = app
+      end
+
+      def call(env)
+        if env['PATH_INFO'] == '/ember-data.js'
+          [200, {'Content-Type' => 'text/javascript'}, [File.read(::Ember::Data::Source.bundled_path_for("ember-data.js"))]]
+        else
+          @app.call(env)
+        end
+      end
+    end
 
     class NoCache
       def initialize(app)
@@ -73,6 +87,7 @@ module EmberDev
         # Include these after RakeP so we can serve from RakeP if available
         use HandlebarsJS
         use EmberJS
+        use EmberData
 
         use ErbIndex, tests_root
         run Rack::Directory.new(tests_root)

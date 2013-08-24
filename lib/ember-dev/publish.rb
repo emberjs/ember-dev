@@ -28,12 +28,9 @@ module EmberDev
 
       s3_options = {
         :content_type     => 'text/javascript',
-        :content_encoding => 'gzip'
       }
 
       files.each do |file|
-        gzipped_file = gzip(file)
-
         basename = Pathname.new(file).basename.sub_ext('')
 
         unminified_targets = [
@@ -44,7 +41,7 @@ module EmberDev
         end
 
         unminified_targets.each do |obj|
-          obj.write(gzipped_file, s3_options)
+          obj.write(file, s3_options)
         end
 
         minified_source = file.sub(/#{basename}.js$/, "#{basename}.min.js")
@@ -58,8 +55,7 @@ module EmberDev
 
         unless excluded_minified_files.include?(file)
           minified_targets.each do |obj|
-            gzipped_minified = gzip(minified_source)
-            obj.write(Pathname.new(gzipped_minified), s3_options)
+            obj.write(Pathname.new(minified_source), s3_options)
           end
         end
 

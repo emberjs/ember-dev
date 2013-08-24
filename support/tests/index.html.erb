@@ -96,6 +96,13 @@
     </script>
   <% end %>
 
+  <% if EmberDev.config.testing_needs_ember_data %>
+    <script type="text/javascript">
+      loadScript('/ember-data.js');
+      // Close the script tag to make sure document.write happens
+    </script>
+  <% end %>
+
   <script>
     // Load ember distribution from query vars
     var distMatch = location.search.match(/dist=([^&]+)/),

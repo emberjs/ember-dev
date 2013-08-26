@@ -13,8 +13,8 @@ module EmberDev
       @current_revision ||= `git rev-list HEAD -n 1`.to_s.strip
     end
 
-    def self.master_revision
-      @master_revision ||= `git rev-list origin/master -n 1`.to_s.strip
+    def self.branch_revision(branch = 'master')
+      `git rev-list origin/#{branch} -n 1`.to_s.strip
     end
 
     def self.to_s3(opts={})
@@ -26,7 +26,10 @@ module EmberDev
 
       subdirectory = opts[:subdirectory] ? opts[:subdirectory] + '/' : ''
 
-      return unless current_revision == master_revision
+      building_master = current_revision == branch_revision('master')
+      building_stable = current_revision == branch_revision('stable')
+
+      return unless building_master || building_stable
       return unless access_key_id && secret_access_key && bucket_name
 
       s3 = AWS::S3.new(
@@ -40,7 +43,7 @@ module EmberDev
       }
 
       files.each do |file|
-        asset_file = Asset.new(file, opts)
+        asset_file = Asset.new(file, opts.merge(:stable => building_stable)
 
         asset_file.files_for_publishing.each do |source_file, target_files|
           target_files.each do |target_file|

@@ -35,9 +35,10 @@ describe EmberDev::Publish::Asset do
     end
 
     it "includes stable path if a stable => true" do
+      stable_targets = %W{stable/ember.js stable/daily/#{todays_date}/ember.js stable/shas/BLAHBLAH/ember.js tags/v999/ember.js}
       asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999', stable: true)
 
-      assert_equal base_targets + %w{tags/v999/ember.js stable/ember.js}, asset_file.targets_for('.js')
+      assert_equal stable_targets, asset_file.targets_for('.js')
     end
   end
 

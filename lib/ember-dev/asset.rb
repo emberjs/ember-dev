@@ -32,14 +32,23 @@ module EmberDev
       end
 
       def targets_for(extension)
-        latest_root   = "#{basename}-latest#{extension}"
-        latest_path   = "latest/#{basename}#{extension}"
-        daily_path    = "daily/#{Date.today.strftime('%Y%m%d')}/#{basename}#{extension}"
-        revision_path = "shas/#{current_revision}/#{basename}#{extension}"
-        tagged_path   = has_tag ? "tags/#{current_tag}/#{basename}#{extension}" : nil
-        stable_path   = stable ? "stable/#{basename}#{extension}" : nil
+        targets = []
+        prefix  = ''
 
-        [latest_root, latest_path, daily_path, revision_path, tagged_path, stable_path].compact
+        if stable
+          prefix  = 'stable/'
+          targets << "#{prefix}#{basename}#{extension}"
+        else
+          targets << "#{basename}-latest#{extension}"
+          targets << "latest/#{basename}#{extension}"
+        end
+
+        targets << "#{prefix}daily/#{Date.today.strftime('%Y%m%d')}/#{basename}#{extension}"
+        targets << "#{prefix}shas/#{current_revision}/#{basename}#{extension}"
+
+        targets << "tags/#{current_tag}/#{basename}#{extension}" if has_tag
+
+        targets.compact
       end
 
       def unminified_targets

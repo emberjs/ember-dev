@@ -43,7 +43,7 @@ module EmberDev
       }
 
       files.each do |file|
-        asset_file = Asset.new(file, opts.merge(:stable => building_stable)
+        asset_file = Asset.new(file, opts.merge(:stable => building_stable))
 
         asset_file.files_for_publishing.each do |source_file, target_files|
           target_files.each do |target_file|

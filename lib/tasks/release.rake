@@ -92,25 +92,10 @@ namespace :ember do
       end
     end
 
-    desc "Upload release"
-    task :upload do
-      setup_uploads
-
-      Dir.chdir "tmp/dist" do
-        sh("git checkout release-builds")
-        sh("git pull")
-        cp("../../dist/ember.js", "ember-#{PROJECT_VERSION}.js", :verbose => false)
-        cp("../../dist/ember.min.js", "ember-#{PROJECT_VERSION}.min.js", :verbose => false)
-        sh("git add ember-#{PROJECT_VERSION}.js ember-#{PROJECT_VERSION}.min.js")
-        sh("git commit -m '#{PROJECT_VERSION} Release'")
-        sh("git push origin release-builds") unless ENV['PRETEND']
-      end
-    end
-
     desc "Prepare for a new release"
     task :prepare => [:update, :changelog, :bump_version]
 
     desc "Commit the new release"
-    task :deploy => [:commit, :tag, :push, :upload]
+    task :deploy => [:commit, :tag, :push]
   end
 end

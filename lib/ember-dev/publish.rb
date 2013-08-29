@@ -47,6 +47,8 @@ module EmberDev
 
         asset_file.files_for_publishing.each do |source_file, target_files|
           target_files.each do |target_file|
+            puts " Publishing #{source_file} -> #{target_file}"
+
             obj = bucket.objects[subdirectory + target_file]
             obj.write(source_file, s3_options)
           end

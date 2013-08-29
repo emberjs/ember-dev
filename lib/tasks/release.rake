@@ -67,7 +67,7 @@ namespace :ember do
       puts "Commiting Version Bump"
       unless pretend?
         sh("git reset")
-        sh(%{git add VERSION CHANGELOG packages/ember-metal/lib/core.js ember.json packages/**/package.json})
+        sh(%{git add VERSION CHANGELOG Gemfile.lock packages/ember-metal/lib/core.js ember.json packages/**/package.json})
         sh("git commit -m 'Version bump - #{PROJECT_VERSION}'")
       end
     end

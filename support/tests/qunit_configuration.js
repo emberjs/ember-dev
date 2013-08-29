@@ -102,7 +102,7 @@
       }
 
       if (!sawAssertion) {
-        ok(false, "Expected Ember.assert: '" + expectedMessage + "', but no assertions where run");
+        ok(false, "Expected Ember.assert: '" + expectedMessage + "', but no assertions were run");
       } else if (arity === 2) {
 
         if (expectedMessage) {

@@ -29,8 +29,14 @@ module EmberDev
       building_master = current_branch == 'master'
       building_stable = current_branch == 'stable'
 
-      return unless building_master || building_stable
-      return unless access_key_id && secret_access_key && bucket_name
+      unless building_master || building_stable
+        puts "Not building master or stable branches. No assets will be published."
+        return
+      end
+
+      unless access_key_id && secret_access_key && bucket_name
+        puts "No AWS values were available. No assets will be published."
+      end
 
       s3 = AWS::S3.new(
         :access_key_id     =>  access_key_id,

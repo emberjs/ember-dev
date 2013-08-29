@@ -28,7 +28,7 @@ module EmberDev
       end
 
       def stable
-        @stable && @stable.to_s != ''
+        @stable
       end
 
       def targets_for(extension)

@@ -13,8 +13,8 @@ module EmberDev
       @current_revision ||= `git rev-list HEAD -n 1`.to_s.strip
     end
 
-    def self.branch_revision(branch = 'master')
-      `git rev-list origin/#{branch} -n 1`.to_s.strip
+    def self.current_branch
+      @current_branch ||= `git rev-parse --abbrev-ref HEAD`.to_s.strip
     end
 
     def self.to_s3(opts={})
@@ -26,8 +26,8 @@ module EmberDev
 
       subdirectory = opts[:subdirectory] ? opts[:subdirectory] + '/' : ''
 
-      building_master = current_revision == branch_revision('master')
-      building_stable = current_revision == branch_revision('stable')
+      building_master = current_branch == 'master'
+      building_stable = current_branch == 'stable'
 
       return unless building_master || building_stable
       return unless access_key_id && secret_access_key && bucket_name

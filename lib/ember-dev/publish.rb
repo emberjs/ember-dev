@@ -10,11 +10,11 @@ module EmberDev
     end
 
     def self.current_revision
-      @current_revision ||= `git rev-list HEAD -n 1`.to_s.strip
+      @current_revision ||= ENV['TRAVIS_COMMIT'] || `git rev-list HEAD -n 1`.to_s.strip
     end
 
     def self.current_branch
-      @current_branch ||= `git rev-parse --abbrev-ref HEAD`.to_s.strip
+      @current_branch ||= ENV['TRAVIS_BRANCH'] || `git rev-parse --abbrev-ref HEAD`.to_s.strip
     end
 
     def self.to_s3(opts={})

@@ -17,6 +17,14 @@ module EmberDev
       @current_branch ||= ENV['TRAVIS_BRANCH'] || `git rev-parse --abbrev-ref HEAD`.to_s.strip
     end
 
+    def self.build_type
+      case current_branch
+      when 'stable','release' then :release
+      when 'beta'             then :beta
+      when 'master'           then :canary
+      end
+    end
+
     def self.to_s3(opts={})
       files = opts.fetch(:files)
       bucket_name = opts.fetch(:bucket_name)
@@ -26,11 +34,8 @@ module EmberDev
 
       subdirectory = opts[:subdirectory] ? opts[:subdirectory] + '/' : ''
 
-      building_master = current_branch == 'master'
-      building_stable = current_branch == 'stable'
-
-      unless building_master || building_stable
-        puts "Not building master or stable branches. No assets will be published."
+      if build_type.nil?
+        puts "Not building release, beta, or canary branches. No assets will be published."
         return
       end
 
@@ -49,7 +54,7 @@ module EmberDev
       }
 
       files.each do |file|
-        asset_file = Asset.new(file, opts.merge(:stable => building_stable))
+        asset_file = Asset.new(file, opts.merge(:build_type => build_type))
 
         asset_file.files_for_publishing.each do |source_file, target_files|
           target_files.each do |target_file|

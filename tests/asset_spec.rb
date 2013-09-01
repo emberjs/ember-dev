@@ -20,7 +20,12 @@ describe EmberDev::Publish::Asset do
   end
 
   describe "#targets_for" do
-    let(:base_targets) { %W{ember-latest.js latest/ember.js daily/#{todays_date}/ember.js shas/BLAHBLAH/ember.js} }
+    let(:base_targets) {
+      %W{ ember-latest.js
+          latest/ember.js
+          canary/ember.js
+          canary/daily/#{todays_date}/ember.js
+          canary/shas/BLAHBLAH/ember.js} }
 
     it "doesn't return the tagged_path if no tag is present" do
       asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: '')
@@ -35,8 +40,13 @@ describe EmberDev::Publish::Asset do
     end
 
     it "includes stable path if a stable => true" do
-      stable_targets = %W{stable/ember.js stable/daily/#{todays_date}/ember.js stable/shas/BLAHBLAH/ember.js tags/v999/ember.js}
-      asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999', stable: true)
+      stable_targets = %W{ stable/ember.js
+                           release/ember.js
+                           release/daily/#{todays_date}/ember.js
+                           release/shas/BLAHBLAH/ember.js
+                           tags/v999/ember.js}
+
+      asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999', build_type: :release)
 
       assert_equal stable_targets, asset_file.targets_for('.js')
     end
@@ -44,20 +54,37 @@ describe EmberDev::Publish::Asset do
 
   it "returns a list of unminified_targets" do
     asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH')
+    expected_targets = %W{ ember-latest.js
+                           latest/ember.js
+                           canary/ember.js
+                           canary/daily/#{todays_date}/ember.js
+                           canary/shas/BLAHBLAH/ember.js }
 
-    assert_equal %W{ember-latest.js latest/ember.js daily/#{todays_date}/ember.js shas/BLAHBLAH/ember.js}, asset_file.unminified_targets
+    assert_equal expected_targets, asset_file.unminified_targets
   end
 
   it "returns a list of minified_targets" do
+    expected_targets = %W{ ember-latest.min.js
+                           latest/ember.min.js
+                           canary/ember.min.js
+                           canary/daily/#{todays_date}/ember.min.js
+                           canary/shas/BLAHBLAH/ember.min.js}
+
     asset_file = described_class.new('ember.js', revision: 'BLAHBLAH')
 
-    assert_equal %W{ember-latest.min.js latest/ember.min.js daily/#{todays_date}/ember.min.js shas/BLAHBLAH/ember.min.js}, asset_file.minified_targets
+    assert_equal expected_targets, asset_file.minified_targets
   end
 
   it "returns a list of production_targets" do
+    expected_targets = %W{ember-latest.prod.js
+                          latest/ember.prod.js
+                          canary/ember.prod.js
+                          canary/daily/#{todays_date}/ember.prod.js
+                          canary/shas/BLAHBLAH/ember.prod.js}
+
     asset_file = described_class.new('ember.js', revision: 'BLAHBLAH')
 
-    assert_equal %W{ember-latest.prod.js latest/ember.prod.js daily/#{todays_date}/ember.prod.js shas/BLAHBLAH/ember.prod.js}, asset_file.production_targets
+    assert_equal expected_targets, asset_file.production_targets
   end
 
   it "knows the location of it's minified source" do

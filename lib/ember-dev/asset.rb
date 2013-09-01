@@ -4,7 +4,7 @@ require_relative 'publish'
 module EmberDev
   module Publish
     class Asset
-      attr_accessor :file, :current_revision, :current_tag, :stable
+      attr_accessor :file, :current_revision, :current_tag, :build_type
 
       def initialize(filename, options = nil)
         options              ||= {}
@@ -12,7 +12,7 @@ module EmberDev
         self.file             = Pathname.new(filename)
         self.current_revision = options.fetch(:revision) { EmberDev::Publish.current_revision }
         self.current_tag      = options.fetch(:tag)      { EmberDev::Publish.current_tag }
-        self.stable           = options.fetch(:stable)   { false }
+        self.build_type       = options.fetch(:build_type)   { :canary }
       end
 
       def basename
@@ -27,22 +27,23 @@ module EmberDev
         current_tag.to_s != ''
       end
 
-      def stable
-        @stable
-      end
-
       def targets_for(extension)
         targets = []
         prefix  = ''
 
-        if stable
-          prefix  = 'stable/'
-          targets << "#{prefix}#{basename}#{extension}"
-        else
+        case build_type
+        when :canary
+          prefix  = 'canary/'
           targets << "#{basename}-latest#{extension}"
           targets << "latest/#{basename}#{extension}"
+        when :beta
+          prefix  = 'beta/'
+        when :release
+          prefix  = 'release/'
+          targets << "stable/#{basename}#{extension}"
         end
 
+        targets << "#{prefix}#{basename}#{extension}"
         targets << "#{prefix}daily/#{Date.today.strftime('%Y%m%d')}/#{basename}#{extension}"
         targets << "#{prefix}shas/#{current_revision}/#{basename}#{extension}"
 

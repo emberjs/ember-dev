@@ -8,7 +8,7 @@ class EmberStripDebugMessagesFilter < Rake::Pipeline::Filter
     # Strip debug code
     data.gsub!(%r{^(\s)*Ember\.(assert|deprecate|warn|debug)\((.*)\).*$}, "")
   end
-  
+
   def add_localhost_warning(data)
     data << "\n\n" + <<END
 if (typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
@@ -164,5 +164,14 @@ class EmberAddMicroLoader < Rake::Pipeline::Filter
 
   def additional_dependencies(input)
     [ LOADER ]
+  end
+end
+
+class EmberDefeatureify < Rake::Pipeline::Filter
+  def generate_output(inputs, output)
+    inputs.each do |input|
+      src = `defeatureify #{input.fullpath} -w features.json`
+      output.write src
+    end
   end
 end

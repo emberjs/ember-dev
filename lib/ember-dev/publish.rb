@@ -1,20 +1,26 @@
 require 'aws-sdk'
 require 'zlib'
 require_relative 'asset'
+require_relative 'git_support'
 
 module EmberDev
   module Publish
 
+    def self.repo
+      @repo ||= GitSupport.new
+    end
+    private_class_method :repo
+
     def self.current_tag
-      `git tag --points-at #{current_revision}`.to_s.strip
+      repo.current_tag
     end
 
     def self.current_revision
-      @current_revision ||= ENV['TRAVIS_COMMIT'] || `git rev-list HEAD -n 1`.to_s.strip
+      repo.current_revision
     end
 
     def self.current_branch
-      @current_branch ||= ENV['TRAVIS_BRANCH'] || `git rev-parse --abbrev-ref HEAD`.to_s.strip
+      repo.current_branch
     end
 
     def self.build_type
@@ -57,6 +63,7 @@ module EmberDev
 
       unless pretend || access_key_id && secret_access_key && bucket_name
         puts "No AWS values were available. No assets will be published."
+        return
       end
 
       unless pretend

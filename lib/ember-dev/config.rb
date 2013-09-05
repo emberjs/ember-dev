@@ -3,7 +3,9 @@ require 'yaml'
 module EmberDev
   class Config
     def self.from_file(path)
-      new(YAML.load_file(path))
+      options = File.exist?(path) ? YAML.load_file(path) : {}
+
+      new(options)
     end
 
     attr_accessor :name

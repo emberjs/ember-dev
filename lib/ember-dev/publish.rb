@@ -25,6 +25,19 @@ module EmberDev
       end
     end
 
+    def debug_information
+      puts 'Publish Debugging Information: '
+      travis_vars = %w{TRAVIS_BRANCH TRAVIS_COMMIT TRAVIS_COMMIT_RANGE TRAVIS_PULL_REQUEST TRAVIS_SECURE_ENV_VARS}
+      travis_vars.each do |variable_name|
+        puts "  #{variable_name}: '#{ENV[variable_name]}'"
+      end
+
+      puts "  current_revision: '#{current_revision}'"
+      puts "  current_branch: '#{current_branch}'"
+      puts "  current_tag: '#{current_tag}'"
+      puts "  build_type: '#{build_type}'"
+    end
+
     def self.to_s3(opts={})
       files = opts.fetch(:files)
       bucket_name = opts.fetch(:bucket_name)
@@ -33,6 +46,8 @@ module EmberDev
       excluded_minified_files = opts[:exclude_minified] || []
 
       subdirectory = opts[:subdirectory] ? opts[:subdirectory] + '/' : ''
+
+      debug_information
 
       if build_type.nil?
         puts "Not building release, beta, or canary branches. No assets will be published."

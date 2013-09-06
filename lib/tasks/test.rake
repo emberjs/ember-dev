@@ -57,14 +57,16 @@ namespace :ember do
 
         test_path = File.expand_path("../../../support/tests", __FILE__)
         cmd = "phantomjs #{test_path}/qunit/run-qunit.js \"http://localhost:#{port}/?#{opt}\""
-        sh(cmd)
 
-        # A bit of a hack until we can figure this out on Travis
+        # If the command fails, don't thrown an exception
+        sh(cmd) rescue nil
+
+        # The command might have failed due to a timeout. If so, try again.
         tries = 0
         while tries < 3 && $?.exitstatus === 124
           tries += 1
           puts "\nTimed Out. Trying again...\n"
-          sh(cmd)
+          sh(cmd) rescue nil
         end
 
         success &&= $?.success?

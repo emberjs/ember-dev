@@ -64,7 +64,7 @@ module EmberDev
           :access_key_id     =>  access_key_id,
           :secret_access_key => secret_access_key)
 
-        @bucket = s3.buckets[bucket_name]
+        @bucket = @s3.buckets[bucket_name]
 
         @s3_options = {
           :content_type     => 'text/javascript',

@@ -50,6 +50,18 @@ describe EmberDev::Publish::Asset do
 
       assert_equal stable_targets, asset_file.targets_for('.js')
     end
+
+    it "doesn't return anything if tags_only is set and no tag is present" do
+      asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tags_only: true)
+
+      assert_equal [], asset_file.targets_for('.js')
+    end
+
+    it "returns only the tags/ item when tags_only is set with a tag present" do
+      asset_file = described_class.new('some_dir/ember.js', revision: 'BLAHBLAH', tag: 'v999', tags_only: true)
+
+      assert_equal ['tags/v999/ember.js'], asset_file.targets_for('.js')
+    end
   end
 
   it "returns a list of unminified_targets" do

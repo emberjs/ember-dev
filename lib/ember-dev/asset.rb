@@ -4,7 +4,7 @@ require_relative 'publish'
 module EmberDev
   module Publish
     class Asset
-      attr_accessor :file, :current_revision, :current_tag, :build_type
+      attr_accessor :file, :current_revision, :current_tag, :build_type, :tags_only
 
       def initialize(filename, options = nil)
         options              ||= {}
@@ -13,6 +13,7 @@ module EmberDev
         self.current_revision = options.fetch(:revision) { EmberDev::Publish.current_revision }
         self.current_tag      = options.fetch(:tag)      { EmberDev::Publish.current_tag }
         self.build_type       = options.fetch(:build_type)   { :canary }
+        self.tags_only         = options.fetch(:tags_only) { false }
       end
 
       def basename
@@ -46,6 +47,8 @@ module EmberDev
         targets << "#{prefix}#{basename}#{extension}"
         targets << "#{prefix}daily/#{Date.today.strftime('%Y%m%d')}/#{basename}#{extension}"
         targets << "#{prefix}shas/#{current_revision}/#{basename}#{extension}"
+
+        targets = [] if tags_only
 
         targets << "tags/#{current_tag}/#{basename}#{extension}" if has_tag
 

@@ -25,7 +25,7 @@ module EmberDev
       end
     end
 
-    def debug_information
+    def self.debug_information
       puts 'Publish Debugging Information: '
       travis_vars = %w{TRAVIS_BRANCH TRAVIS_COMMIT TRAVIS_COMMIT_RANGE TRAVIS_PULL_REQUEST TRAVIS_SECURE_ENV_VARS}
       travis_vars.each do |variable_name|

@@ -43,7 +43,8 @@ module EmberDev
       bucket_name = opts.fetch(:bucket_name)
       access_key_id = opts.fetch(:access_key_id)
       secret_access_key = opts.fetch(:secret_access_key)
-      excluded_minified_files = opts[:exclude_minified] || []
+      pretend = opts.fetch(:pretend) { ENV['PRETEND'] }
+      tags_only = opts.fetch(:tags_only) { ENV['TAGS_ONLY'] }
 
       subdirectory = opts[:subdirectory] ? opts[:subdirectory] + '/' : ''
 
@@ -54,29 +55,33 @@ module EmberDev
         return
       end
 
-      unless access_key_id && secret_access_key && bucket_name
+      unless pretend || access_key_id && secret_access_key && bucket_name
         puts "No AWS values were available. No assets will be published."
       end
 
-      s3 = AWS::S3.new(
-        :access_key_id     =>  access_key_id,
-        :secret_access_key => secret_access_key)
+      unless pretend
+        @s3 = AWS::S3.new(
+          :access_key_id     =>  access_key_id,
+          :secret_access_key => secret_access_key)
 
-      bucket = s3.buckets[bucket_name]
+        @bucket = s3.buckets[bucket_name]
 
-      s3_options = {
-        :content_type     => 'text/javascript',
-      }
+        @s3_options = {
+          :content_type     => 'text/javascript',
+        }
+      end
 
       files.each do |file|
-        asset_file = Asset.new(file, opts.merge(:build_type => build_type))
+        asset_file = Asset.new(file, opts.merge(:build_type => build_type, :tags_only => tags_only))
 
         asset_file.files_for_publishing.each do |source_file, target_files|
           target_files.each do |target_file|
             puts " Publishing #{source_file} -> #{target_file}"
 
-            obj = bucket.objects[subdirectory + target_file]
-            obj.write(source_file, s3_options)
+            unless pretend
+              obj = @bucket.objects[subdirectory + target_file]
+              obj.write(source_file, @s3_options)
+            end
           end
         end
       end

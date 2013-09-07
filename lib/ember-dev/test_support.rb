@@ -24,7 +24,7 @@ module EmberDev
       success = false
 
       EmberDev::TestRunner.with_server do
-        success = test_support.test_runs.all? do |run_params|
+        success = test_runs.all? do |run_params|
           EmberDev::TestRunner.run(run_params)
         end
       end

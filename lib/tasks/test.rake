@@ -5,7 +5,10 @@ namespace :ember do
       abort "PhantomJS is not installed. Download from http://phantomjs.org"
     end
 
-    test_support = EmberDev::TestSupport.new(:selected_suite => args[:suite])
+    params = {}
+    params[:selected_suite] = args[:suite] if args[:suite]
+
+    test_support = EmberDev::TestSupport.new(params)
 
     unless test_support.test_runs
       abort "No suite named: #{test_support.selected_suite}"

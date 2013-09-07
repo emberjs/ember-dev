@@ -75,35 +75,15 @@ module EmberDev
       @phantom_path ||= 'phantomjs'
     end
 
-
     def run
-      sh(test_command)
+      system(test_command)
 
       # A bit of a hack until we can figure this out on Travis
       tries = 0
       while tries < 3 && $?.exitstatus === 124
         tries += 1
         puts "\nTimed Out. Trying again...\n"
-        sh(test_command)
-      end
-
-      $?.success?
-    end
-
-    def sh(cmd)
-      # http://grosser.it/2010/12/11/sh-without-rake/
-      puts cmd
-
-      begin
-        IO.popen(cmd) do |pipe|
-          while str = pipe.gets($/, 1)
-            $stdout.write str
-          end
-        end
-      rescue => ex
-        puts '** Begin Caught Exception ** '
-        puts [ex.message, *ex.backtrace]
-        puts '** End Caught Exception **'
+        system(test_command)
       end
 
       $?.success?

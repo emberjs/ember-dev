@@ -120,4 +120,95 @@ describe EmberDev::GitSupport do
       assert_equal base_repo_commits, commits_for_repo(git_support.repo_path)
     end
   end
+
+  describe "listing commits since master" do
+    let(:repo_path) { standard_repo_on_branch }
+
+    it "should return the commit SHA's and their commit messages" do
+      expected_response = { "2956fa9116bfcf7b54b5bd73c2e656747f528381" => "Add wilma.",
+                            "3ab485e06fcfae8949b065ad0dfaefeba5828fb1" => "Added blammo.",
+                            "397b98770c3e742298500795cc632d2a1100e2e3" => "Added blahzorz."}
+      initial_git_response = expected_response.map{|k,v| "#{k} #{v}"}.join("\n")
+
+      git_support.stub :git_command, initial_git_response do
+        assert_equal expected_response, git_support.commits
+      end
+    end
+  end
+
+  describe "the range of commits since master" do
+    let(:repo_path) { standard_repo_on_branch }
+
+    it "should use the TRAVIS_COMMIT_RANGE variable if present" do
+      env = {'TRAVIS' => 'true', 'TRAVIS_COMMIT_RANGE' => 'blardyblarblar'}
+
+      git_support = EmberDev::GitSupport.new(repo_path, :env => env)
+
+      assert_equal 'blardyblarblar', git_support.commit_range
+    end
+
+    it "should return a string representing the range from the current commit to master" do
+      expected_result = git_support.current_revision + '...master'
+
+     assert_equal expected_result, git_support.commit_range
+    end
+  end
+
+  describe "can checkout another branch" do
+    let(:repo_path) { tmpdir + '/clone_path' }
+
+    before do
+      `git clone --quiet file://#{standard_repo_on_branch.realpath} #{repo_path}`
+    end
+
+    it "can checkout the master branch" do
+      base_repo_commits = commits_for_repo(standard_repo)
+
+      git_support.checkout('master')
+
+      assert_equal base_repo_commits, commits_for_repo(repo_path)
+    end
+  end
+
+  describe 'can cherry-pick commits by sha' do
+    let(:repo_path) { tmpdir + '/clone_path' }
+    let(:master_commits) { commits_for_repo(standard_repo) }
+    let(:barney_commits) { commits_for_repo(standard_repo_on_branch) }
+    let(:cherry_picked_sha) { barney_commits.first }
+
+    before do
+      `git clone --quiet file://#{standard_repo_on_branch.realpath} #{repo_path}`
+
+      in_repo_dir repo_path do
+        `git config user.email "test@example.com"`
+        `git config user.name "Test User"`
+      end
+
+      git_support.checkout('master')
+      assert_equal master_commits, commits_for_repo(repo_path)
+    end
+
+
+    it "returns true if the commit is already in the current branch" do
+      assert git_support.cherry_pick(barney_commits.first)
+    end
+
+    it "adds the changes from the specified <SHA> to the current branch" do
+      git_support.cherry_pick(cherry_picked_sha)
+
+      in_repo_dir repo_path do
+        assert `git log --grep="#{cherry_picked_sha}"`.include?(cherry_picked_sha)
+      end
+
+      assert `diff --exclude '.git' #{standard_repo_on_branch} #{repo_path}`.empty?
+    end
+
+    it "returns false if the commit cannot be cleanly merged" do
+      in_repo_dir repo_path do
+        FileUtils.touch('wilma')
+      end
+
+      refute git_support.cherry_pick(cherry_picked_sha)
+    end
+  end
 end

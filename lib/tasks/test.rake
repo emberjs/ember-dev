@@ -14,9 +14,7 @@ namespace :ember do
       abort "No suite named: #{test_support.selected_suite}"
     end
 
-    success = test_support.run_all
-
-    if success
+    if test_support.run_all
       puts "\nTests Passed".green
     else
       puts "\nTests Failed".red

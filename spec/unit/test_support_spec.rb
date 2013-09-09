@@ -1,6 +1,6 @@
 require 'minitest/autorun'
 
-require_relative '../lib/ember-dev'
+require_relative '../../lib/ember-dev'
 
 describe EmberDev::TestSupport do
   let(:support) { EmberDev::TestSupport.new(debug: false) }

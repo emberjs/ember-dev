@@ -1,35 +1,14 @@
 require 'tmpdir'
 require 'minitest/autorun'
 
-require_relative '../lib/ember-dev/git_support'
+require_relative '../../lib/ember-dev/git_support'
+require_relative '../support/tmpdir_helpers'
+require_relative '../support/repo_helpers'
 
 describe EmberDev::GitSupport do
-  before do
-    @tmpdir = Dir.mktmpdir
-    at_exit{ FileUtils.remove_entry @tmpdir }
-  end
+  include TmpdirHelpers
+  include RepoHelpers
 
-  def copy_repo(from, to = @tmpdir)
-    new_path = File.join(to, File.basename(from))
-
-    FileUtils.cp_r from, new_path
-
-    new_path
-  end
-
-  def in_repo_dir(path)
-    Dir.chdir path do
-      yield
-    end
-  end
-
-  def commits_for_repo(path)
-    in_repo_dir path do
-      `git rev-list HEAD`.to_s.split("\n")
-    end
-  end
-
-  let(:tmpdir) { @tmpdir }
   let(:standard_repo) { Pathname.new('spec/support/test_repos/standard_repo') }
   let(:standard_repo_on_branch) { Pathname.new('spec/support/test_repos/standard_repo_on_branch') }
 

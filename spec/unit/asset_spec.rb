@@ -1,6 +1,6 @@
 require 'minitest/autorun'
 
-require_relative '../lib/ember-dev/asset'
+require_relative '../../lib/ember-dev/asset'
 
 describe EmberDev::Publish::Asset do
   let(:described_class) { EmberDev::Publish::Asset }

@@ -1,3 +1,5 @@
+require 'tmpdir'
+
 module TmpdirHelpers
   def tmpdir
     @tmpdir ||= Dir.mktmpdir

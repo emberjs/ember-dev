@@ -1,7 +1,7 @@
 require 'net/http'
 require 'minitest/autorun'
 
-require_relative '../lib/ember-dev'
+require_relative '../../lib/ember-dev'
 
 describe EmberDev::TestRunner do
   describe "running server thread" do

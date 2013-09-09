@@ -3,9 +3,18 @@ require 'fileutils'
 require 'rake/testtask'
 
 Rake::TestTask.new do |t|
+  t.name = 'test:unit'
   t.libs << "spec"
-  t.test_files = FileList['spec/**/*_spec.rb']
+  t.test_files = FileList['spec/unit/**/*_spec.rb']
 end
+
+Rake::TestTask.new do |t|
+  t.name = 'test:integration'
+  t.libs << "spec"
+  t.test_files = FileList['spec/integration/**/*_spec.rb']
+end
+
+task :test => ['test:unit', 'test:integration']
 
 task :clear_test_repos do
   FileUtils.rm_rf 'spec/support/test_repos'

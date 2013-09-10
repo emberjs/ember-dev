@@ -5,13 +5,16 @@ module EmberDev
     attr_accessor :repo_path
 
     def initialize(repo_path = '.', options = {})
-      self.repo_path = Pathname.new(repo_path)
+      self.repo_path = Pathname.new(repo_path).realpath
       @env           = options.fetch(:env) { ENV }
+      @git_version   = git_command('git --version')
       @use_travis_environment_variables = options.fetch(:use_travis_environment_variables) { true }
     end
 
     def use_travis_environment_variables
-      @use_travis_environment_variables && @env['TRAVIS']
+      @use_travis_environment_variables &&
+        @env['TRAVIS'] &&
+        @env['TRAVIS_BUILD_DIR'] == repo_path.to_s
     end
 
     def current_tag
@@ -81,7 +84,9 @@ module EmberDev
 
       unless $?.success?
         puts "The git command failed: '#{command_to_run}'\n"
-        puts result
+        puts "  Using git version: #{@git_version}"
+        puts "  Call stack: ", *caller.map{|s| "    #{s}" }
+        puts "  Result:", *result.split("\n").map{|s| "    #{s}" }
       end
 
       result

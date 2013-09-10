@@ -6,10 +6,11 @@ module EmberDev
   class TestRunner
 
     def self.with_server
-      server
+      start_server
+      wait_for_server
       yield
     ensure
-      server.kill
+      stop_server
     end
 
     def self.run(params)
@@ -24,13 +25,20 @@ module EmberDev
       self.class.server_port
     end
 
-    def self.server
-      @server ||= Thread.new do
+    def self.start_server
+      @server_pid ||= fork do
         Rack::Server.start(:config => "config.ru",
                            :Logger => WEBrick::Log.new("/dev/null"),
                            :AccessLog => [],
                            :Port => server_port.to_i)
       end
+    end
+
+    def self.stop_server
+      return true unless @server_pid
+
+      Process.kill 'INT', @server_pid
+      @server_pid = nil
     end
 
     def self.server_ready?
@@ -43,7 +51,8 @@ module EmberDev
     end
 
     def self.wait_for_server(timeout = 1)
-      server
+      start_server unless @server_pid
+
       start_time = Time.now
       loop do
         break if server_ready?

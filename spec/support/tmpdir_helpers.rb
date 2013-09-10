@@ -5,9 +5,8 @@ module TmpdirHelpers
     @tmpdir ||= Dir.mktmpdir
   end
 
-  def setup
-    @tmpdir = Dir.mktmpdir
-    at_exit{ FileUtils.remove_entry @tmpdir }
+  def teardown
+    FileUtils.remove_entry tmpdir
   end
 end
 

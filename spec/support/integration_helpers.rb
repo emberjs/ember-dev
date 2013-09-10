@@ -1,3 +1,5 @@
+require 'bundler'
+
 module IntegrationHelpers
   def override_gemfile
     gemfile = File.read('Gemfile')

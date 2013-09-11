@@ -93,33 +93,30 @@ describe EmberDev::TestSupport do
       git_support_mock.verify
     end
 
-    it "if [BUGFIX beta] is in the commit message" do
-      git_support_mock.expect :commits, {'d9afd8d6d5cbe7b' => '[BUGFIX beta] Some random message.'}
+    describe "with special commit messages" do
+      let(:special_messages_by_branch) do
+        { "[BUGFIX beta]" => ['beta'],
+          "[BUGFIX release]" => ['beta','stable'],
+          "BLAH BLAH [BUGFIX release]" => ['beta','stable'],
+          "[DOC beta]" => ['beta'],
+          "[DOC release]" => ['beta','stable'],
+          "[SECURITY]" => ['beta','stable']
+        }
+      end
 
-      expected_response = {'beta'   => ['d9afd8d6d5cbe7b']}
+      it "handles the special commit messages properly" do
+        special_messages_by_branch.each do |message, branches|
+          git_support_mock = Minitest::Mock.new
+          support = EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock)
 
-      assert_equal expected_response, support.commits_by_branch
-      git_support_mock.verify
-    end
+          git_support_mock.expect :commits, {'d9afd8d6d5cbe7b' => "#{message} Some random message."}
 
-    it "if [BUGFIX release] is in the commit message" do
-      git_support_mock.expect :commits, {'d9afd8d6d5cbe7b' => '[BUGFIX release] Some random message.'}
+          expected_response = Hash[branches.map{|b| [b, ['d9afd8d6d5cbe7b']]}]
 
-      expected_response = {'beta'   => ['d9afd8d6d5cbe7b'],
-                           'stable' => ['d9afd8d6d5cbe7b']}
-
-      assert_equal expected_response, support.commits_by_branch
-      git_support_mock.verify
-    end
-
-    it "if [SECURITY] is in the commit message" do
-      git_support_mock.expect :commits, {'d9afd8d6d5cbe7b' => '[SECURITY] Some random message.'}
-
-      expected_response = {'beta'   => ['d9afd8d6d5cbe7b'],
-                           'stable' => ['d9afd8d6d5cbe7b']}
-
-      assert_equal expected_response, support.commits_by_branch
-      git_support_mock.verify
+          assert_equal expected_response, support.commits_by_branch, "Invalid commits flagged for: #{message}"
+          git_support_mock.verify
+        end
+      end
     end
   end
 

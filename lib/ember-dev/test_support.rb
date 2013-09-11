@@ -64,9 +64,9 @@ module EmberDev
 
       git_support.commits.each do |sha, message|
         case message
-        when /\[BUGFIX beta\]/
+        when /\[BUGFIX beta\]/, /\[DOC beta\]/
           ret['beta'] << sha
-        when /\[BUGFIX release\]/
+        when /\[BUGFIX release\]/, /\[DOC release\]/
           ret['beta'] << sha
           ret['stable'] << sha
         when /\[SECURITY\]/

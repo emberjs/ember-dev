@@ -9,6 +9,10 @@ describe EmberDev::Publish::Asset do
 
   let(:filenames) { %w{ember.js ember-runtime.js ember.prod.js} }
 
+  before do
+    asset_file.ignore_missing_files = true
+  end
+
   it "should accept a filename as input" do
     assert_raises(ArgumentError) { described_class.new }
   end
@@ -71,6 +75,17 @@ describe EmberDev::Publish::Asset do
                            canary/ember.js
                            canary/daily/#{todays_date}/ember.js
                            canary/shas/BLAHBLAH/ember.js }
+
+    assert_equal expected_targets, asset_file.unminified_targets
+  end
+
+  it "uses the initial file extension as the base for all targets" do
+    asset_file = described_class.new('some_dir/ember.grrr', revision: 'BLAHBLAH')
+    expected_targets = %W{ ember-latest.grrr
+                           latest/ember.grrr
+                           canary/ember.grrr
+                           canary/daily/#{todays_date}/ember.grrr
+                           canary/shas/BLAHBLAH/ember.grrr }
 
     assert_equal expected_targets, asset_file.unminified_targets
   end
@@ -146,6 +161,16 @@ describe EmberDev::Publish::Asset do
 
       it "doesn't include a tagged release if tag is empty/nil" do
         assert_equal expected_hash, asset_file.files_for_publishing
+      end
+    end
+
+    describe "only outputs files that exist in files_for_publishing" do
+      before do
+        asset_file.ignore_missing_files = false
+      end
+
+      it "doesn't include anything if no files exist" do
+        assert_equal({}, asset_file.files_for_publishing)
       end
     end
   end

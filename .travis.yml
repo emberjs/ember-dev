@@ -1,5 +1,9 @@
 ---
 rvm:
 - 1.9.3
-before_script: rake setup_test_repos
+install:
+- bundle install
+- npm install -g defeatureify yuidocjs
+before_script:
+- rake setup_test_repos
 script: rake test

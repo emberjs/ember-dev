@@ -8,7 +8,9 @@ module EmberDev
   autoload :TestSupport, 'ember-dev/test_support'
   autoload :TestRunner,  'ember-dev/test_runner'
   autoload :GitSupport,  'ember-dev/git_support'
-  autoload :DocumentationGenerator, 'ember-dev/documentation_generator'
+
+  autoload :DocumentationGenerator,       'ember-dev/documentation_generator'
+  autoload :ChannelReleasesFileGenerator, 'ember-dev/channel_releases_file_generator'
 
   def self.config
     @@config ||= Config.from_file('ember-dev.yml')

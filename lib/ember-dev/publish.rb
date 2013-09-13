@@ -1,7 +1,9 @@
 require 'aws-sdk'
 require 'zlib'
+
 require_relative 'asset'
 require_relative 'git_support'
+require_relative 'channel_releases_file_generator'
 
 module EmberDev
   module Publish
@@ -76,6 +78,13 @@ module EmberDev
         @s3_options = {
           :content_type     => 'text/javascript',
         }
+
+        generator = ChannelReleasesFileGenerator.new
+
+        if generator.should_generate?
+          obj = @bucket.objects[generator.destination_path]
+          obj.write(generator.to_json, {:content_type => 'application/json'})
+        end
       end
 
       files.each do |file|

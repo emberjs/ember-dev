@@ -15,18 +15,41 @@ describe EmberDev::TestSupport do
   end
 
   describe 'knows about test suites' do
+    let(:fake_packages) { ['foo','bar'] }
+    let(:support) { EmberDev::TestSupport.new(debug: false, packages: fake_packages) }
+
     it "contains 'default'" do
       assert support.suites['default']
     end
 
     it "builds a suite for each known package" do
-      fake_packages = ['foo','bar']
-      support = EmberDev::TestSupport.new(debug: false, packages: fake_packages)
-
       suites = support.suites
 
       fake_packages.each do |package|
         assert_equal ["package=#{package}"], suites[package]
+      end
+    end
+
+    it "reads EmberDev.config.testing_suites for additional suites" do
+      testing_suites = {'suite1' => ['blah', 'blah'], 'suite2' => ['boo', 'foo']}
+      EmberDev.config.testing_suites = testing_suites
+
+      suites = support.suites
+
+      testing_suites.each do |suite_name, runs|
+        assert_equal runs, suites[suite_name]
+      end
+    end
+
+    it "adds each package individually to suites runs if EACH_PACKAGE is found" do
+      testing_suites = {'each' => ['EACH_PACKAGE']}
+      EmberDev.config.testing_suites = testing_suites
+
+      suites = support.suites
+
+      fake_packages.each do |package|
+        assert suites['each'].include?("package=#{package}")
+        assert suites['each'].include?("package=#{package}&enableallfeatures=true")
       end
     end
   end

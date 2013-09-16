@@ -91,7 +91,7 @@ module EmberDev
       # This is a bit of a hack
       suites.each do |name, opts|
         if idx = opts.index('EACH_PACKAGE')
-          opts[idx] = packages.map{|package| "package=#{package}" }
+          opts[idx] = packages.map{|package| ["package=#{package}","package=#{package}&enableallfeatures=true"] }
           opts.flatten!
         end
       end

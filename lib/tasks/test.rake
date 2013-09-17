@@ -5,6 +5,10 @@ namespace :ember do
       abort "PhantomJS is not installed. Download from http://phantomjs.org"
     end
 
+    if File.exists?('features.json') && !sh("which defeatureify > /dev/null 2>&1")
+      abort "You have a `features.json` file, but defeatureify is not installed. You can install it with:\nnpm install -g defeatureify."
+    end
+
     params = {}
     params[:selected_suite] = args[:suite] if args[:suite]
 

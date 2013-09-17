@@ -41,16 +41,45 @@ describe EmberDev::TestSupport do
       end
     end
 
-    it "adds each package individually to suites runs if EACH_PACKAGE is found" do
-      testing_suites = {'each' => ['EACH_PACKAGE']}
-      EmberDev.config.testing_suites = testing_suites
+    describe "adds each package individually to suite runs if EACH_PACKAGE is found" do
+      it "tests with features on and off if no `features.json` file is found" do
+        testing_suites = {'each' => ['EACH_PACKAGE']}
+        EmberDev.config.testing_suites = testing_suites
 
-      suites = support.suites
+        suites = support.suites
+        expected_runs = []
 
-      fake_packages.each do |package|
-        assert suites['each'].include?("package=#{package}")
-        assert suites['each'].include?("package=#{package}&enableallfeatures=true")
+        fake_packages.each do |package|
+          expected_runs << "package=#{package}"
+          expected_runs << "package=#{package}&enableallfeatures=true"
+        end
+
+        assert_equal expected_runs, suites['each']
       end
+
+      it "if `features.json` file is found it does not test with enableallfeatures" do
+        testing_suites = {'each' => ['EACH_PACKAGE']}
+        EmberDev.config.testing_suites = testing_suites
+
+        def support.features_file_is_available?; true; end
+
+        suites = support.suites
+        expected_runs = []
+
+        fake_packages.each do |package|
+          expected_runs << "package=#{package}"
+        end
+
+        assert_equal expected_runs, suites['each']
+      end
+    end
+  end
+
+  it "knows when a features_file_is_available?" do
+    refute support.features_file_is_available?
+
+    Dir.chdir 'spec/support' do
+      assert support.features_file_is_available?
     end
   end
 

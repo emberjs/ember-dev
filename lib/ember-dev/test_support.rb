@@ -78,6 +78,10 @@ module EmberDev
       ret
     end
 
+    def features_file_is_available?
+      File.exists?('features.json')
+    end
+
     private
 
     def build_suites
@@ -91,7 +95,7 @@ module EmberDev
       # This is a bit of a hack
       suites.each do |name, opts|
         if idx = opts.index('EACH_PACKAGE')
-          opts[idx] = packages.map{|package| "package=#{package}" }
+          opts[idx] = each_package_test_runs
           opts.flatten!
         end
       end
@@ -105,5 +109,18 @@ module EmberDev
       end]
     end
 
+    def each_package_test_runs
+      output = []
+
+      packages.each do |package|
+        output << "package=#{package}"
+
+        unless features_file_is_available?
+          output << "package=#{package}&enableallfeatures=true"
+        end
+      end
+
+      output
+    end
   end
 end

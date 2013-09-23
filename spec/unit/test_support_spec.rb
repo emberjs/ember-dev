@@ -15,19 +15,71 @@ describe EmberDev::TestSupport do
   end
 
   describe 'knows about test suites' do
+    let(:fake_packages) { ['foo','bar'] }
+    let(:support) { EmberDev::TestSupport.new(debug: false, packages: fake_packages) }
+
     it "contains 'default'" do
       assert support.suites['default']
     end
 
     it "builds a suite for each known package" do
-      fake_packages = ['foo','bar']
-      support = EmberDev::TestSupport.new(debug: false, packages: fake_packages)
-
       suites = support.suites
 
       fake_packages.each do |package|
         assert_equal ["package=#{package}"], suites[package]
       end
+    end
+
+    it "reads EmberDev.config.testing_suites for additional suites" do
+      testing_suites = {'suite1' => ['blah', 'blah'], 'suite2' => ['boo', 'foo']}
+      EmberDev.config.testing_suites = testing_suites
+
+      suites = support.suites
+
+      testing_suites.each do |suite_name, runs|
+        assert_equal runs, suites[suite_name]
+      end
+    end
+
+    describe "adds each package individually to suite runs if EACH_PACKAGE is found" do
+      it "tests with features on and off if no `features.json` file is found" do
+        testing_suites = {'each' => ['EACH_PACKAGE']}
+        EmberDev.config.testing_suites = testing_suites
+
+        suites = support.suites
+        expected_runs = []
+
+        fake_packages.each do |package|
+          expected_runs << "package=#{package}"
+          expected_runs << "package=#{package}&enableallfeatures=true"
+        end
+
+        assert_equal expected_runs, suites['each']
+      end
+
+      it "if `features.json` file is found it does not test with enableallfeatures" do
+        testing_suites = {'each' => ['EACH_PACKAGE']}
+        EmberDev.config.testing_suites = testing_suites
+
+        def support.features_file_is_available?; true; end
+
+        suites = support.suites
+        expected_runs = []
+
+        fake_packages.each do |package|
+          expected_runs << "package=#{package}"
+        end
+
+        assert_equal expected_runs, suites['each']
+      end
+    end
+  end
+
+  it "knows when a features_file_is_available?" do
+    refute support.features_file_is_available?
+
+    Dir.chdir 'spec/support' do
+      assert support.features_file_is_available?
     end
   end
 

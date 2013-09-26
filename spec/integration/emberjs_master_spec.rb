@@ -1,5 +1,3 @@
-require 'rake'
-require 'tmpdir'
 require 'minitest/autorun'
 
 require_relative '../support/tmpdir_helpers'

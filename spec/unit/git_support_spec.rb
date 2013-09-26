@@ -1,4 +1,3 @@
-require 'tmpdir'
 require 'minitest/autorun'
 
 require_relative '../../lib/ember-dev/git_support'
@@ -13,6 +12,36 @@ describe EmberDev::GitSupport do
   let(:standard_repo_on_branch) { Pathname.new('spec/support/test_repos/standard_repo_on_branch') }
 
   let(:git_support) { EmberDev::GitSupport.new(repo_path, :use_travis_environment_variables => false) }
+
+  describe "Uses travis's enviroment variables when appropriate" do
+    let(:repo_path)   { standard_repo }
+
+    before do
+      git_support
+    end
+
+    it "uses them when the repo_path == the TRAVIS_BUILD_DIR" do
+      git_support = EmberDev::GitSupport.new(repo_path, :env => {
+        'TRAVIS' => 'true',
+        'TRAVIS_BUILD_DIR' => repo_path.realpath.to_s
+      })
+
+      in_repo_dir repo_path do
+        assert git_support.use_travis_environment_variables
+      end
+    end
+
+    it "doesn't use them when the repo_path isn't the TRAVIS_BUILD_DIR" do
+      git_support = EmberDev::GitSupport.new(repo_path, :env => {
+        'TRAVIS' => 'true',
+        'TRAVIS_BUILD_DIR' => standard_repo_on_branch.realpath.to_s
+      })
+
+      in_repo_dir standard_repo_on_branch do
+        refute git_support.use_travis_environment_variables
+      end
+    end
+  end
 
   describe "Working on master branch with tag at HEAD" do
     let(:repo_path)   { standard_repo }
@@ -119,7 +148,9 @@ describe EmberDev::GitSupport do
     let(:repo_path) { standard_repo_on_branch }
 
     it "should use the TRAVIS_COMMIT_RANGE variable if present" do
-      env = {'TRAVIS' => 'true', 'TRAVIS_COMMIT_RANGE' => 'blardyblarblar'}
+      env = {'TRAVIS'              => 'true',
+             'TRAVIS_COMMIT_RANGE' => 'blardyblarblar',
+             'TRAVIS_BUILD_DIR'    => repo_path.realpath.to_s}
 
       git_support = EmberDev::GitSupport.new(repo_path, :env => env)
 

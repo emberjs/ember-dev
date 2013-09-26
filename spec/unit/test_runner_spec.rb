@@ -6,11 +6,11 @@ require_relative '../../lib/ember-dev'
 describe EmberDev::TestRunner do
   describe "running server thread" do
     after do
-      EmberDev::TestRunner.server.kill
+      EmberDev::TestRunner.stop_server
     end
 
     it "spawns the server thread" do
-      EmberDev::TestRunner.server
+      EmberDev::TestRunner.start_server
       EmberDev::TestRunner.wait_for_server
 
       http = Net::HTTP.new("localhost", 60099)

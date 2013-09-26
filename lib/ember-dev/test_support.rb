@@ -60,6 +60,8 @@ module EmberDev
     end
 
     def commits_by_branch
+      return @commits_by_branch if @commits_by_branch
+
       ret = Hash.new{|h,k| h[k] = []}
 
       git_support.commits.each do |sha, message|
@@ -75,7 +77,7 @@ module EmberDev
         end
       end
 
-      ret
+      @commits_by_branch = ret
     end
 
     def features_file_is_available?

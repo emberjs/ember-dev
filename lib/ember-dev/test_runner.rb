@@ -26,7 +26,7 @@ module EmberDev
     end
 
     def self.start_server
-      @server_pid ||= fork do
+      @server_thread ||= Thread.new do
         Rack::Server.start(:config => "config.ru",
                            :Logger => WEBrick::Log.new("/dev/null"),
                            :AccessLog => [],
@@ -35,10 +35,11 @@ module EmberDev
     end
 
     def self.stop_server
-      return true unless @server_pid
+      return true unless @server_thread
 
-      Process.kill 'INT', @server_pid
-      @server_pid = nil
+      @server_thread.kill
+
+      @server_thread = nil
     end
 
     def self.server_ready?
@@ -51,7 +52,7 @@ module EmberDev
     end
 
     def self.wait_for_server(timeout = 1)
-      start_server unless @server_pid
+      start_server unless @server_thread
 
       start_time = Time.now
       loop do

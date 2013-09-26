@@ -30,7 +30,7 @@ describe "Properly run a multi-branch test." do
       override_gemfile
 
       assert system("bundle update ember-dev")
-      assert system("RUBYOPT='-r#{@original_working_directory}/lib/ember-dev' rake test")
+      assert system("rake test")
     end
 
     in_repo_dir project_path do

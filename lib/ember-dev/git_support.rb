@@ -30,6 +30,12 @@ module EmberDev
       git_command("git rev-list HEAD -n 1")
     end
 
+    def master_revision
+      git_command("git ls-remote --heads origin master")
+        .split(/\s/)
+        .first
+    end
+
     def current_branch
       branches_containing_commit.first
     end
@@ -39,7 +45,7 @@ module EmberDev
     end
 
     def commit_range
-      current_revision + '...master'
+        master_revision + '...' + current_revision
     end
 
     def checkout(branch)
@@ -67,7 +73,7 @@ module EmberDev
       git_command("git branch --all --contains #{current_revision}")
         .split("\n")
         .reject{|r| r =~ /detached/ } # get rid of any entries for detached head
-        .collect{|r| r.gsub(/\W/, '') }
+        .collect{|r| r.gsub(/[\s\*]/, '') }
     end
 
     def git_command(command_to_run)

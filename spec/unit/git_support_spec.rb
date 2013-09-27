@@ -115,12 +115,36 @@ describe EmberDev::GitSupport do
   end
 
   describe "the range of commits since master" do
-    let(:repo_path) { standard_repo_on_branch }
+    let(:repo_path) { Pathname.new(tmpdir).join('clone_path') }
 
-    it "should return a string representing the range from the current commit to master" do
-      expected_result = git_support.current_revision + '...master'
+    before do
+      `git clone --quiet file://#{standard_repo_on_branch.realpath} #{repo_path}`
+    end
 
-     assert_equal expected_result, git_support.commit_range
+    it "should return a string representing the range from the current commit to the master revision" do
+      expected_result = git_support.master_revision + '...' + git_support.current_revision
+
+      assert_equal expected_result, git_support.commit_range
+    end
+  end
+
+  describe "Can determine the master revision" do
+    let(:repo_path) { tmpdir + '/clone_path' }
+
+    before do
+      `git clone --quiet file://#{standard_repo_on_branch.realpath} #{repo_path}`
+    end
+
+    it "returns the correct sha" do
+      base_repo_commits = commits_for_repo(standard_repo)
+
+      assert_equal base_repo_commits.first, git_support.master_revision
+    end
+
+    it "does not equal the current_revision" do
+      base_repo_commits = commits_for_repo(standard_repo)
+
+      refute_equal base_repo_commits.first, git_support.current_revision
     end
   end
 

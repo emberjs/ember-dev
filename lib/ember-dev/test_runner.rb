@@ -30,7 +30,8 @@ module EmberDev
         Rack::Server.start(:config => "config.ru",
                            :Logger => WEBrick::Log.new("/dev/null"),
                            :AccessLog => [],
-                           :Port => server_port.to_i)
+                           :Port => server_port.to_i,
+                           :server => 'Puma')
       end
     end
 

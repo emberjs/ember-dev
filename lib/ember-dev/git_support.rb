@@ -9,7 +9,6 @@ module EmberDev
       @env           = options.fetch(:env) { ENV }
       @debug         = options.fetch(:debug) { false }
       @git_version   = git_command('git --version')
-      @use_travis_environment_variables = options.fetch(:use_travis_environment_variables) { true }
 
       print_debugging_info if @debug
     end
@@ -23,30 +22,16 @@ module EmberDev
       puts "  commits: #{commits}"
     end
 
-    def use_travis_environment_variables
-      @use_travis_environment_variables &&
-        @env['TRAVIS'] &&
-        @env['TRAVIS_BUILD_DIR'] == repo_path.to_s
-    end
-
     def current_tag
       git_command "git tag --points-at #{current_revision}"
     end
 
     def current_revision
-      if use_travis_environment_variables
-        @env['TRAVIS_COMMIT']
-      else
-        git_command("git rev-list HEAD -n 1")
-      end
+      git_command("git rev-list HEAD -n 1")
     end
 
     def current_branch
-      if use_travis_environment_variables
-        @env['TRAVIS_BRANCH']
-      else
-        branches_containing_commit.first
-      end
+      branches_containing_commit.first
     end
 
     def make_shallow_clone_into_full_clone
@@ -54,11 +39,7 @@ module EmberDev
     end
 
     def commit_range
-      if use_travis_environment_variables
-        @env['TRAVIS_COMMIT_RANGE']
-      else
-        current_revision + '...master'
-      end
+      current_revision + '...master'
     end
 
     def checkout(branch)

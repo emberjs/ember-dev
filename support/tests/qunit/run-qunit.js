@@ -1,122 +1,158 @@
-// PhantomJS QUnit Test Runner
+/*
+ * QtWebKit-powered headless test runner using PhantomJS
+ *
+ * PhantomJS binaries: http://phantomjs.org/download.html
+ * Requires PhantomJS 1.6+ (1.7+ recommended)
+ *
+ * Run with:
+ *   phantomjs runner.js [url-of-your-qunit-testsuite]
+ *
+ * e.g.
+ *   phantomjs runner.js http://localhost/qunit/test/index.html
+ */
 
-/*globals QUnit phantom*/
+/*global phantom:false, require:false, console:false, window:false, QUnit:false */
 
-var args = phantom.args;
-if (args.length < 1 || args.length > 2) {
-  console.log("Usage: " + phantom.scriptName + " <URL> <timeout>");
-  phantom.exit(1);
-}
+(function() {
+	'use strict';
 
-var fs = require('fs');
-function print(str) {
-  fs.write('/dev/stdout', str, 'w');
-}
+	var url, page, timeout,
+		args = require('system').args;
 
-var page = require('webpage').create();
+	// arg[0]: scriptName, args[1...]: arguments
+	if (args.length < 2 || args.length > 3) {
+		console.error('Usage:\n  phantomjs runner.js [url-of-your-qunit-testsuite] [timeout-in-seconds]');
+		phantom.exit(1);
+	}
 
-page.onConsoleMessage = function(msg) {
-  if (msg.slice(0,8) === 'WARNING:') { return; }
-  if (msg.slice(0,6) === 'DEBUG:') { return; }
+	url = args[1];
+	page = require('webpage').create();
+	if (args[2] !== undefined) {
+		timeout = parseInt(args[2], 10);
+	}
 
-  // Hack to access the print method
-  // If there's a better way to do this, please change
-  if (msg.slice(0,6) === 'PRINT:') {
-    print(msg.slice(7));
-    return;
+  var fs = require('fs');
+  function print(str) {
+    fs.write('/dev/stdout', str, 'w');
   }
 
-  console.log(msg);
-};
+	// Route `console.log()` calls from within the Page context to the main Phantom context (i.e. current `this`)
+  page.onConsoleMessage = function(msg) {
+    if (msg.slice(0,8) === 'WARNING:') { return; }
+    if (msg.slice(0,6) === 'DEBUG:') { return; }
 
-page.open(args[0], function(status) {
-  if (status !== 'success') {
-    console.error("Unable to access network");
-    phantom.exit(1);
-  } else {
-    page.evaluate(logQUnit);
+    // Hack to access the print method
+    // If there's a better way to do this, please change
+    if (msg.slice(0,6) === 'PRINT:') {
+      print(msg.slice(7));
+      return;
+    }
 
-    var timeout = parseInt(args[1] || 60000, 10);
-    var start = Date.now();
-    var interval = setInterval(function() {
-      if (Date.now() > start + timeout) {
-        console.error("Tests timed out");
-        phantom.exit(124);
-      } else {
-        var qunitDone = page.evaluate(function() {
-          return window.qunitDone;
-        });
+    console.log(msg);
+  };
 
-        if (qunitDone) {
-          clearInterval(interval);
-          if (qunitDone.failed > 0) {
-            phantom.exit(1);
-          } else {
-            phantom.exit();
-          }
+	page.onInitialized = function() {
+		page.evaluate(addLogging);
+	};
+
+	page.onCallback = function(message) {
+		var result,
+			failed;
+
+		if (message) {
+			if (message.name === 'QUnit.done') {
+				result = message.data;
+				failed = !result || result.failed;
+
+				phantom.exit(failed ? 1 : 0);
+			}
+		}
+	};
+
+	page.open(url, function(status) {
+		if (status !== 'success') {
+			console.error('Unable to access network: ' + status);
+			phantom.exit(1);
+		} else {
+			// Cannot do this verification with the 'DOMContentLoaded' handler because it
+			// will be too late to attach it if a page does not have any script tags.
+			var qunitMissing = page.evaluate(function() { return (typeof QUnit === 'undefined' || !QUnit); });
+			if (qunitMissing) {
+				console.error('The `QUnit` object is not present on this page.');
+				phantom.exit(1);
+			}
+
+			// Set a timeout on the test running, otherwise tests with async problems will hang forever
+			if (typeof timeout === 'number') {
+				setTimeout(function() {
+					console.error('The specified timeout of ' + timeout + ' seconds has expired. Aborting...');
+					phantom.exit(1);
+				}, timeout * 1000);
+			}
+
+			// Do nothing... the callback mechanism will handle everything!
+		}
+	});
+
+	function addLogging() {
+		window.document.addEventListener('DOMContentLoaded', function() {
+			var currentTestAssertions = [];
+
+      console.log("\nRunning: " + JSON.stringify(QUnit.urlParams));
+
+			QUnit.log(function(details) {
+				var response;
+
+				// Ignore passing assertions
+				if (details.result) {
+					return;
+				}
+
+				response = details.message || '';
+
+				if (typeof details.expected !== 'undefined') {
+					if (response) {
+						response += ', ';
+					}
+
+					response += 'expected: ' + details.expected + ', but was: ' + details.actual;
+				}
+
+				if (details.source) {
+					response += "\n" + details.source;
+				}
+
+				currentTestAssertions.push('Failed assertion: ' + response);
+			});
+
+			QUnit.testDone(function(result) {
+				var i,
+					len,
+					name = result.module + ': ' + result.name;
+
+				if (result.failed) {
+					console.log('Test failed: ' + name);
+
+					for (i = 0, len = currentTestAssertions.length; i < len; i++) {
+						console.log('    ' + currentTestAssertions[i]);
+					}
+				} else {
+          console.log('PRINT: .');
         }
-      }
-    }, 500);
-  }
-});
 
-function logQUnit() {
-  var moduleErrors = [];
-  var testErrors = [];
-  var assertionErrors = [];
+				currentTestAssertions.length = 0;
+			});
 
-  console.log("\nRunning: " + JSON.stringify(QUnit.urlParams) + "\n");
+			QUnit.done(function(result) {
+				console.log('\nTook ' + result.runtime +  'ms to run ' + result.total + ' tests. ' + result.passed + ' passed, ' + result.failed + ' failed.');
 
-  QUnit.moduleDone(function(context) {
-    if (context.failed) {
-      var msg = "Module Failed: " + context.name + "\n" + testErrors.join("\n");
-      moduleErrors.push(msg);
-      testErrors = [];
-    }
-  });
-
-  QUnit.testDone(function(context) {
-    if (context.failed) {
-      var msg = "  Test Failed: " + context.name + assertionErrors.join("    ");
-      testErrors.push(msg);
-      assertionErrors = [];
-      console.log('PRINT: F');
-    } else {
-      console.log('PRINT: .');
-    }
-  });
-
-  QUnit.log(function(context) {
-    if (context.result) { return; }
-
-    var msg = "\n    Assertion Failed:";
-    if (context.message) {
-      msg += " " + context.message;
-    }
-
-    if (context.expected) {
-      msg += "\n      Expected: " + context.expected + ", Actual: " + context.actual;
-    }
-
-    assertionErrors.push(msg);
-  });
-
-  QUnit.done(function(context) {
-    console.log('\n');
-
-    if (moduleErrors.length > 0) {
-      for (var idx=0; idx<moduleErrors.length; idx++) {
-        console.error(moduleErrors[idx]+"\n");
-      }
-    }
-
-    var stats = [
-      "Time: " + context.runtime + "ms",
-      "Total: " + context.total,
-      "Passed: " + context.passed,
-      "Failed: " + context.failed
-    ];
-    console.log(stats.join(", "));
-    window.qunitDone = context;
-  });
-}
+				if (typeof window.callPhantom === 'function') {
+					window.callPhantom({
+						'name': 'QUnit.done',
+						'data': result
+					});
+				}
+			});
+		}, false);
+	}
+})();

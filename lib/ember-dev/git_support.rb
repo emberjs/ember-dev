@@ -7,8 +7,20 @@ module EmberDev
     def initialize(repo_path = '.', options = {})
       self.repo_path = Pathname.new(repo_path).realpath
       @env           = options.fetch(:env) { ENV }
+      @debug         = options.fetch(:debug) { false }
       @git_version   = git_command('git --version')
       @use_travis_environment_variables = options.fetch(:use_travis_environment_variables) { true }
+
+      print_debugging_info if @debug
+    end
+
+    def print_debugging_info
+      puts "Git Support Debugging Info:"
+      puts "  commit_range: #{commit_range}"
+      puts "  current_tag: #{current_tag}"
+      puts "  current_branch: #{current_branch}"
+      puts "  current_revision: #{current_revision}"
+      puts "  commits: #{commits}"
     end
 
     def use_travis_environment_variables

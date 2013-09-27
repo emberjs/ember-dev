@@ -131,7 +131,7 @@ class EmberStub < Rake::Pipeline::Filter
   def generate_output(inputs, output)
     inputs.each do |input|
       file = File.read(input.fullpath)
-      out = "(function() {\nvar Ember = { assert: function() {} };\n"
+      out = "(function() {\nvar Ember = { assert: function() {}, FEATURES: { isEnabled: function() {} } };\n"
 
       out << file
       out << "\nexports.precompile = Ember.Handlebars.precompile;"

@@ -51,7 +51,7 @@ module EmberDev
     rescue(Errno::ETIMEDOUT)
     end
 
-    def self.wait_for_server(timeout = 1)
+    def self.wait_for_server(timeout = 30)
       start_server unless @server_thread
 
       start_time = Time.now

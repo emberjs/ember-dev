@@ -41,7 +41,9 @@ module EmberDev
     end
 
     def make_shallow_clone_into_full_clone
-      git_command 'git fetch --quiet --unshallow'
+      if repo_path.join('.git','shallow').exist?
+        git_command 'git fetch --quiet --unshallow'
+      end
     end
 
     def commit_range

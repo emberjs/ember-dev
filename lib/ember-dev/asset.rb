@@ -87,6 +87,14 @@ module EmberDev
                             production_source => production_targets
       end
 
+      def content_type(extension = extension)
+        case extension
+        when '.js'   then 'text/javascript'
+        when '.json' then 'application/json'
+        when '.html' then 'text/html'
+        end
+      end
+
       private
 
       def strip_missing_files(hash)

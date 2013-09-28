@@ -9,6 +9,7 @@ module EmberDev
   autoload :TestRunner,  'ember-dev/test_runner'
   autoload :GitSupport,  'ember-dev/git_support'
 
+  autoload :TestSiteGenerator,            'ember-dev/test_site_generator'
   autoload :DocumentationGenerator,       'ember-dev/documentation_generator'
   autoload :ChannelReleasesFileGenerator, 'ember-dev/channel_releases_file_generator'
 

@@ -76,6 +76,7 @@ describe EmberDev::GitSupport do
 
   describe "Can turn a shallow clone into a full clone" do
     let(:shallow_clone_path) { tmpdir + '/shallow_clone' }
+    let(:full_clone_path) { tmpdir + '/full_clone' }
     let(:repo_path) { shallow_clone_path }
 
     let(:base_repo_commits) { commits_for_repo(standard_repo) }
@@ -96,6 +97,19 @@ describe EmberDev::GitSupport do
       git_support.make_shallow_clone_into_full_clone
 
       assert_equal base_repo_commits, commits_for_repo(git_support.repo_path)
+    end
+
+    it "does not attempt to unshallowify a full repo" do
+      `git clone --quiet file://#{standard_repo.realpath} #{full_clone_path}`
+
+      git_support = EmberDev::GitSupport.new(full_clone_path)
+
+      def git_support.git_command(command); @git_commands_called ||= []; @git_commands_called << command; end
+      def git_support.git_commands_called; @git_commands_called; end
+
+      git_support.make_shallow_clone_into_full_clone
+
+      assert_equal nil, git_support.git_commands_called
     end
   end
 

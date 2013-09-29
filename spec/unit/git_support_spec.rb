@@ -11,7 +11,7 @@ describe EmberDev::GitSupport do
   let(:standard_repo) { Pathname.new('spec/support/test_repos/standard_repo') }
   let(:standard_repo_on_branch) { Pathname.new('spec/support/test_repos/standard_repo_on_branch') }
 
-  let(:git_support) { EmberDev::GitSupport.new(repo_path) }
+  let(:git_support) { EmberDev::GitSupport.new(repo_path, debug: false) }
 
   describe "Working on master branch with tag at HEAD" do
     let(:repo_path)   { standard_repo }
@@ -102,7 +102,7 @@ describe EmberDev::GitSupport do
     it "does not attempt to unshallowify a full repo" do
       `git clone --quiet file://#{standard_repo.realpath} #{full_clone_path}`
 
-      git_support = EmberDev::GitSupport.new(full_clone_path)
+      git_support = EmberDev::GitSupport.new(full_clone_path, debug: false)
 
       def git_support.git_command(command); @git_commands_called ||= []; @git_commands_called << command; end
       def git_support.git_commands_called; @git_commands_called; end

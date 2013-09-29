@@ -7,7 +7,7 @@ module EmberDev
     def initialize(repo_path = '.', options = {})
       self.repo_path = Pathname.new(repo_path).realpath
       @env           = options.fetch(:env) { ENV }
-      @debug         = options.fetch(:debug) { false }
+      @debug         = options.fetch(:debug) { true }
       @git_version   = git_command('git --version')
 
       print_debugging_info if @debug
@@ -80,10 +80,12 @@ module EmberDev
 
     def git_command(command_to_run)
       result =  Dir.chdir(repo_path) do
-                  `#{command_to_run}`.to_s.strip
+                  IO.popen(command_to_run, :err=>[:child, :out]) do |io|
+                    io.read.chomp
+                  end
                 end
 
-      unless $?.success?
+      if !$?.success? && @debug
         puts "The git command failed: '#{command_to_run}'\n"
         puts "  Using git version: #{@git_version}"
         puts "  Call stack: ", *caller.map{|s| "    #{s}" }

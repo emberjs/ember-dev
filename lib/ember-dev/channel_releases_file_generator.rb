@@ -10,7 +10,8 @@ module EmberDev
     def initialize(options = nil)
       options ||= {}
 
-      @git_support = options.fetch(:git_support) { GitSupport.new }
+      @debug = options.fetch(:debug, true)
+      @git_support = options.fetch(:git_support) { GitSupport.new '.', :debug => @debug }
       @project_name = options.fetch(:project_name) { EmberDev::Config.from_file('ember-dev.yml').name }
     end
 

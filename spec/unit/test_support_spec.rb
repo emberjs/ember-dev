@@ -30,6 +30,14 @@ describe EmberDev::TestSupport do
       end
     end
 
+    it "builds :default suite from each_package_test_runs" do
+      def support.each_package_test_runs; ['blahzorz']; end
+
+      suites = support.suites
+
+      assert_equal ['blahzorz'], suites['default'], 'default suite should be populated by each_package_test_runs'
+    end
+
     it "reads EmberDev.config.testing_suites for additional suites" do
       testing_suites = {'suite1' => ['blah', 'blah'], 'suite2' => ['boo', 'foo']}
       EmberDev.config.testing_suites = testing_suites
@@ -45,6 +53,8 @@ describe EmberDev::TestSupport do
       it "tests with features on and off if no `features.json` file is found" do
         testing_suites = {'each' => ['EACH_PACKAGE']}
         EmberDev.config.testing_suites = testing_suites
+
+        def support.features_file_is_available?; false; end
 
         suites = support.suites
         expected_runs = []

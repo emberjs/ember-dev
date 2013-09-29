@@ -3,9 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <title><%= EmberDev.config.name %> Test Suite</title>
-  <link rel="stylesheet" href="qunit/qunit.css" type="text/css" media="screen">
-  <script type="text/javascript" src="qunit/qunit.js"></script>
-  <script type="text/javascript" src="minispade.js"></script>
+  <% if static? %>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.12.0.css" type="text/css" media="screen">
+    <script type="text/javascript" src="https://code.jquery.com/qunit/qunit-1.12.0.js"></script>
+    <script type="text/javascript"><%= minispade_source %></script>
+  <% else %>
+    <link rel="stylesheet" href="qunit/qunit.css" type="text/css" media="screen">
+    <script type="text/javascript" src="qunit/qunit.js"></script>
+    <script type="text/javascript" src="minispade.js"></script>
+  <% end %>
+
 
   <script type="text/javascript">
     window.loadScript = function(url) {
@@ -45,7 +52,13 @@
     };
   </script>
 
-  <script type="text/javascript" src="qunit_configuration.js"></script>
+  <% if static? %>
+    <script type="text/javascript">
+      <%= qunit_configuration_source %>
+    </script>
+  <% else %>
+    <script type="text/javascript" src="qunit_configuration.js"></script>
+  <% end %>
 </head>
 <body>
   <h1 id="qunit-header"><%= EmberDev.config.name %> Test Suite</h1>
@@ -57,7 +70,11 @@
 
   <script type="text/javascript">
     if (EmberDev.jsHint) {
-      loadScript('jshint.js');
+      <% if static? %>
+        <%= jshint_source %>
+      <% else %>
+        loadScript('jshint.js');
+      <% end %>
     }
     // Close the script tag to make sure document.write happens
   </script>
@@ -66,7 +83,7 @@
     // Load custom version of jQuery if possible (assign to window so IE8 can use in later blocks)
     var jQueryVersion = QUnit.urlParams.jquery || "1.10.2";
     if (jQueryVersion !== 'none') {
-      loadScript('http://code.jquery.com/jquery-'+jQueryVersion+'.js');
+      loadScript('https://code.jquery.com/jquery-'+jQueryVersion+'.js');
     }
     // Close the script tag to make sure document.write happens
   </script>
@@ -85,7 +102,11 @@
     var handlebarsVersion = QUnit.urlParams.handlebars;
 
     if (handlebarsVersion !== 'none') {
-      loadScript('/handlebars.js');
+      <% if static? %>
+        loadScript('http://builds.emberjs.com/handlebars-1.0.0.js');
+      <% else %>
+        loadScript('/handlebars.js');
+      <% end %>
     }
     // Close the script tag to make sure document.write happens
   </script>

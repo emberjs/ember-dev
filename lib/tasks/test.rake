@@ -26,6 +26,13 @@ namespace :ember do
     end
   end
 
+  desc "Generate a static test site."
+  task :generate_static_test_site => :dist do
+    generator = EmberDev::TestSiteGenerator.new(static: true)
+
+    generator.save('dist/tests.html')
+  end
+
   desc "Automatically run tests (Mac OS X only)"
   task :autotest do
     sh("kicker -e 'rake test' packages")

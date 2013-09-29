@@ -77,10 +77,6 @@ module EmberDev
 
         @bucket = @s3.buckets[bucket_name]
 
-        @s3_options = {
-          :content_type     => 'text/javascript',
-        }
-
         generator = ChannelReleasesFileGenerator.new
 
         if generator.should_generate?
@@ -98,7 +94,7 @@ module EmberDev
 
             unless pretend
               obj = @bucket.objects[subdirectory + target_file]
-              obj.write(source_file, @s3_options)
+              obj.write(source_file, {:content_type => asset_file.content_type})
             end
           end
         end

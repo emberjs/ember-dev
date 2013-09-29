@@ -9,7 +9,7 @@ module EmberDev
   module Publish
 
     def self.repo
-      @repo ||= GitSupport.new
+      @repo ||= GitSupport.new '.', :debug => false
     end
     private_class_method :repo
 

@@ -1,4 +1,5 @@
 PROJECT_VERSION = File.read("VERSION").strip
+require 'ember-dev'
 
 namespace :ember do
   namespace :release do
@@ -17,11 +18,11 @@ namespace :ember do
       last_tag = `git describe --tags --abbrev=0`.strip
       puts "Getting Changes since #{last_tag}"
 
-      cmd = "git log #{last_tag}..HEAD --format='* %s'"
+      cmd = "git log #{last_tag}..HEAD --format='  * %s'"
 
       changes = `#{cmd}`
 
-      output = "*Ember #{PROJECT_VERSION} (#{Time.now.strftime("%B %d, %Y")})*\n\n#{changes}\n"
+      output = "* #{EmberDev.config.name} #{PROJECT_VERSION} (#{Time.now.strftime("%B %d, %Y")})*\n\n#{changes}\n"
 
       unless pretend?
         open('CHANGELOG', 'r+') do |file|

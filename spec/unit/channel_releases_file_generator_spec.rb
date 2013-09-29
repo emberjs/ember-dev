@@ -5,17 +5,17 @@ require_relative '../../lib/ember-dev'
 module EmberDev
   describe ChannelReleasesFileGenerator do
     let(:git_support_mock) { Minitest::Mock.new }
-    let(:generator) { ChannelReleasesFileGenerator.new(:git_support => git_support_mock, :project_name => 'Ember') }
+    let(:generator) { ChannelReleasesFileGenerator.new(:git_support => git_support_mock, :project_name => 'Ember', :debug => false) }
 
     it "uses the provided project name" do
-      generator = ChannelReleasesFileGenerator.new(:project_name => 'Ember Data')
+      generator = ChannelReleasesFileGenerator.new(:project_name => 'Ember Data', :debug => false)
 
       assert_equal 'Ember Data', generator.project_name
     end
 
     it "uses infers the project name from ember-dev.yml in the working directory" do
       Dir.chdir 'spec/support' do
-        generator = ChannelReleasesFileGenerator.new
+        generator = ChannelReleasesFileGenerator.new :debug => false
 
         assert_equal 'Ember Dev', generator.project_name
       end

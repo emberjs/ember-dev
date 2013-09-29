@@ -30,6 +30,8 @@ module EmberDev
       when 'stable','release' then :release
       when 'beta'             then :beta
       when 'master'           then :canary
+      else
+        ENV['BUILD_TYPE'] && ENV['BUILD_TYPE'].to_sym
       end
     end
 

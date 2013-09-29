@@ -88,7 +88,7 @@ module EmberDev
 
     def build_suites
       suites = build_suite_for_each_package
-      suites['default'] = packages.map{|p| "package=#{p}"}
+      suites['default'] = ['EACH_PACKAGE']
 
       if EmberDev.config.testing_suites
         suites.merge!(EmberDev.config.testing_suites)

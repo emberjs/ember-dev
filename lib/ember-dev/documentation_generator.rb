@@ -34,7 +34,7 @@ module EmberDev
     end
 
     def yuidoc_available?
-      system("which yuidoc > /dev/null 2>&1")
+      system("yuidoc --version > /dev/null 2>&1")
     end
 
     def run_yuidoc

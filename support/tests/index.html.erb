@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.12.0.css" type="text/css" media="screen">
     <script type="text/javascript" src="https://code.jquery.com/qunit/qunit-1.12.0.js"></script>
     <script type="text/javascript"><%= minispade_source %></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.2.5/json3.min.js"></script>
   <% else %>
     <link rel="stylesheet" href="qunit/qunit.css" type="text/css" media="screen">
     <script type="text/javascript" src="qunit/qunit.js"></script>
@@ -58,6 +59,15 @@
     </script>
   <% else %>
     <script type="text/javascript" src="qunit_configuration.js"></script>
+  <% end %>
+
+  <% if static? %>
+    <script type="text/javascript">
+      window.global_test_results = null;
+      QUnit.done(function( details ) {
+        window.global_test_results = details;
+      });
+    </script>
   <% end %>
 </head>
 <body>

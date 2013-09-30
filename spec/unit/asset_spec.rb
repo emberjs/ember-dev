@@ -174,4 +174,18 @@ describe EmberDev::Publish::Asset do
       end
     end
   end
+
+  describe 'content_type' do
+    it "returns text/html for *.html files" do
+      assert_equal 'text/html', asset_file.content_type('.html')
+    end
+
+    it "returns text/javascript for *.js files" do
+      assert_equal 'text/javascript', asset_file.content_type('.js')
+    end
+
+    it "returns application/json for *.json files" do
+      assert_equal 'application/json', asset_file.content_type('.json')
+    end
+  end
 end

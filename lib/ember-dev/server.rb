@@ -31,7 +31,7 @@ module EmberDev
         end
       end
     end
-    
+
     class EmberData
       def initialize(app)
         @app = app
@@ -59,14 +59,14 @@ module EmberDev
     end
 
     class ErbIndex
-      def initialize(app, root)
+      def initialize(app)
         @app = app
-        @root = root
       end
 
       def call(env)
         if env['PATH_INFO'] == '/'
-          data = ERB.new(File.read(File.join(@root, 'index.html.erb'))).result
+          data = TestSiteGenerator.output
+
           [200, {'Content-Type' => 'text/html'}, [data]]
         else
           @app.call(env)
@@ -89,7 +89,7 @@ module EmberDev
         use EmberJS
         use EmberData
 
-        use ErbIndex, tests_root
+        use ErbIndex
         run Rack::Directory.new(tests_root)
       end
     end

@@ -63,9 +63,53 @@
 
   <% if static? %>
     <script type="text/javascript">
-      window.global_test_results = null;
+      window.globalFailedTests  = [];
+      window.globalTestResults = null;
+      window.lastAssertionTime = new Date().getTime();
+
+      var currentTest, assertCount;
+
+      QUnit.testStart(function(data) {
+        // Reset the assertion count
+        assertCount = 0;
+
+        currentTest = {
+          name: data.name,
+          failedAssertions: [],
+          total: 0,
+          passed: 0,
+          failed: 0,
+          start: new Date(),
+          time: 0
+        };
+      })
+
+      QUnit.log(function(data) {
+        assertCount++;
+        lastAssertionTime = new Date().getTime();
+
+        // Ignore passing assertions
+        if (!data.result) {
+          currentTest.failedAssertions.push(data);
+        }
+      });
+
+      QUnit.testDone(function(data) {
+        currentTest.time = (new Date()).getTime() - currentTest.start.getTime();  // ms
+        currentTest.total = data.total;
+        currentTest.passed = data.passed;
+        currentTest.failed = data.failed;
+
+        if (currentTest.failed > 0)
+          window.globalFailedTests.push(currentTest)
+
+        currentTest = null;
+      });
+
       QUnit.done(function( details ) {
-        window.global_test_results = details;
+        details.failedTests = globalFailedTests;
+
+        window.globalTestResults = details;
       });
     </script>
   <% end %>

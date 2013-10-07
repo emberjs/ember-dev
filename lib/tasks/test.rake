@@ -30,7 +30,7 @@ namespace :ember do
   task :generate_static_test_site => :dist do
     generator = EmberDev::TestSiteGenerator.new(static: true)
 
-    generator.save('dist/tests.html')
+    generator.save("dist/#{EmberDev.config.dasherized_name}-tests.html")
   end
 
   desc "Automatically run tests (Mac OS X only)"

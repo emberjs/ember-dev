@@ -24,17 +24,17 @@ describe "Can run the static site test suite" do
     let(:project_git_url) { "https://github.com/emberjs/ember.js.git" }
 
     it "passes tests" do
-      command = "#{phantom_path} #{javascript_test_path}/qunit/run-qunit.js \"dist/tests.html\""
+      command = "#{phantom_path} #{javascript_test_path}/qunit/run-qunit.js \"dist/ember-tests.html\""
       assert system(command)
     end
   end
 
   describe "for emberjs/data" do
-    let(:project_path) { File.join(tmpdir, 'ember.js') }
-    let(:project_git_url) { "https://github.com/emberjs/ember.js.git" }
+    let(:project_path) { File.join(tmpdir, 'data') }
+    let(:project_git_url) { "https://github.com/emberjs/data.git" }
 
     it "passes tests" do
-      command = "#{phantom_path} #{javascript_test_path}/qunit/run-qunit.js \"dist/tests.html\""
+      command = "#{phantom_path} #{javascript_test_path}/qunit/run-qunit.js \"dist/ember-data-tests.html\""
       assert system(command)
     end
   end

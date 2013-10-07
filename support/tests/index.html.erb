@@ -179,10 +179,14 @@
   <% end %>
 
   <% unless EmberDev.config.testing_ember %>
-    <script type="text/javascript">
-      loadScript('/ember.js');
-      // Close the script tag to make sure document.write happens
-    </script>
+      <script type="text/javascript">
+        <% if static? %>
+          loadScript('https://s3.amazonaws.com/builds.emberjs.com/release/ember.js');
+        <% else %>
+          loadScript('/ember.js');
+        <% end %>
+        // Close the script tag to make sure document.write happens
+      </script>
   <% end %>
 
   <% if EmberDev.config.testing_needs_ember_data %>

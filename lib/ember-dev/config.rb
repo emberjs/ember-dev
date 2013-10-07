@@ -22,5 +22,9 @@ module EmberDev
       @assetfile ||= EmberDev.support_path.join("Assetfile").to_s
       @testing_packages ||= []
     end
+
+    def dasherized_name
+      name.downcase.gsub(' ','-')
+    end
   end
 end

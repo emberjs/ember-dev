@@ -198,16 +198,17 @@ describe EmberDev::TestSupport do
     end
   end
 
+
   describe "iterates over each branch and runs tests" do
     let(:git_support_mock) { Minitest::Mock.new }
-    let(:support) { EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock) }
+    let(:support) { EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock, :enable_multi_branch_tests => true) }
 
     before do
       git_support_mock.expect :commits, {'d9afd8d6d5cbe7b' => '[BUGFIX release] Some random message.'}
 
       # trap and track each call to 'prepare_for_branch_tests'
       def support.prepare_for_branch_tests_calls
-        @prepare_calls
+        @prepare_calls ||= 0
       end
       def support.prepare_for_branch_tests(branch)
         @prepare_calls ||= []
@@ -221,6 +222,29 @@ describe EmberDev::TestSupport do
       def support.run_all_tests_on_current_revision
         @run_all_counter ||= 0
         @run_all_counter +=1
+      end
+    end
+
+    describe "by default only tests current branch" do
+      let(:git_support_mock) { Minitest::Mock.new }
+      let(:support) { EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock) }
+
+      it "calls run_all_test once" do
+        support.run_all
+
+        assert_equal 1, support.run_all_tests_on_current_revision_counter
+      end
+
+      it "does not checkout or cherry-pick" do
+        support.run_all
+
+        assert_equal 0, support.prepare_for_branch_tests_calls
+      end
+
+      it "does not compare commit messages" do
+        support.run_all
+
+        assert_raises(MockExpectationError) { git_support_mock.verify }
       end
     end
 
@@ -245,7 +269,7 @@ describe EmberDev::TestSupport do
 
         assert_equal false, support.run_all
 
-        assert_equal nil, support.prepare_for_branch_tests_calls
+        assert_equal 0, support.prepare_for_branch_tests_calls
       end
 
       it "if the second run fails" do

@@ -6,4 +6,7 @@ install:
 - npm install -g defeatureify yuidocjs
 before_script:
 - rake setup_test_repos
-script: rake test
+script: "bundle exec rake test:$TEST_SUITE"
+env:
+- TEST_SUITE=unit
+- TEST_SUITE=integration

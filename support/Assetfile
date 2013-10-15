@@ -33,7 +33,7 @@ input "packages" do
       id
     }
 
-    concat "ember-spade.js"
+    concat "#{EmberDev.config.dasherized_name}-spade.js"
 
     # MEGAHAX
     if defined?(ember_spade_postprocess)

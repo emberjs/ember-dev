@@ -11,6 +11,7 @@ namespace :ember do
 
     params = {}
     params[:selected_suite] = args[:suite] if args[:suite]
+    params[:enable_multi_branch_tests] = true if ENV['CI']
 
     test_support = EmberDev::TestSupport.new(params)
 

@@ -8,6 +8,7 @@ module EmberDev
       @debug          = options.fetch(:debug)            { true }
       @selected_suite = options.fetch(:selected_suite)   { 'default' }
       @git_support    = options.fetch(:git_support)      { GitSupport.new('.', :debug => @debug) }
+      @multi_branch   = options.fetch(:enable_multi_branch_tests) { false }
     end
 
     def packages
@@ -23,8 +24,9 @@ module EmberDev
     end
 
     def run_all
-      puts 'Running tests on master' if debug
+      puts "Running tests on #{git_support.current_branch}" if debug
       return false unless run_all_tests_on_current_revision
+      return true unless @multi_branch
 
       branches_to_test.all? do |branch|
         prepare_for_branch_tests(branch) && run_all_tests_on_current_revision

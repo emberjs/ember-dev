@@ -3,7 +3,8 @@ require 'fileutils'
 
 module EmberDev
   class DocumentationGenerator
-    def initialize(path = 'docs', generated_output_path = 'build/data.json')
+    def initialize(path = 'docs', generated_output_path = 'build/data.json', version_calculator = VersionCalculator.new)
+      @version_calculator    = version_calculator
       @documentation_path    = Pathname.new(path)
       @generated_output_path = @documentation_path.join(generated_output_path)
     end
@@ -12,9 +13,7 @@ module EmberDev
       return true if @yuidoc_ran
       return false unless can_generate?
 
-      Dir.chdir @documentation_path do
-        run_yuidoc
-      end
+      run_yuidoc
     end
 
     def can_generate?
@@ -25,6 +24,10 @@ module EmberDev
       return false unless generate
 
       FileUtils.cp(@generated_output_path.to_s, destination_path.to_s)
+    end
+
+    def version
+      @version_calculator.version
     end
 
     private
@@ -38,7 +41,7 @@ module EmberDev
     end
 
     def run_yuidoc
-      @yuidoc_ran = system('yuidoc -p -q')
+      @yuidoc_ran = system("cd #{@documentation_path} && yuidoc -p -q --project-version #{version}")
     end
   end
 end

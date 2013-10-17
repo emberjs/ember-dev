@@ -24,11 +24,15 @@ describe "Can generate the appropriate YUIDocs" do
 
       FileUtils.rm_rf 'docs/build'
 
-      Dir.chdir 'docs' do
-        system('yuidoc -p -q')
+      system('cd docs && yuidoc -p -q')
+
+      expected_docs = File.read('docs/build/data.json')
+
+      [expected_docs, generated_docs].each do |docs|
+        docs.gsub! %r{"version": .+,$}, '"version": "99999999",'
       end
 
-      assert_equal File.read('docs/build/data.json'), generated_docs
+      assert_equal expected_docs, generated_docs
     end
   end
 end

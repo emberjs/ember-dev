@@ -1,10 +1,13 @@
-PROJECT_VERSION = File.read("VERSION").strip
 require 'ember-dev'
 
 namespace :ember do
   namespace :release do
     def pretend?
       ENV['PRETEND']
+    end
+
+    def project_version
+      VersionCalculator.new.version
     end
 
     desc "Update repo"
@@ -22,7 +25,7 @@ namespace :ember do
 
       changes = `#{cmd}`
 
-      output = "* #{EmberDev.config.name} #{PROJECT_VERSION} (#{Time.now.strftime("%B %d, %Y")})*\n\n#{changes}\n"
+      output = "* #{EmberDev.config.name} #{project_version} (#{Time.now.strftime("%B %d, %Y")})*\n\n#{changes}\n"
 
       unless pretend?
         open('CHANGELOG', 'r+') do |file|
@@ -36,29 +39,28 @@ namespace :ember do
       end
     end
 
+    desc "Remove metadata from VERSION"
+    task :remove_version_metadata do
+      current_version = File.read('VERSION')
+      new_version = current_version.sub(/\+.+/,'')
+
+      File.write('VERSION', new_version)
+    end
+
     desc "bump the version to the one specified in the VERSION file"
     task :bump_version, :version do
-      puts "Bumping to version: #{PROJECT_VERSION}"
+      puts "Bumping to version: #{project_version}"
 
       unless pretend?
         # Bump the version of each component package
-        Dir["packages/ember*/package.json", "ember.json"].each do |package|
+        Dir["docs/yuidoc.json", "packages/ember*/package.json", "ember.json"].each do |package|
           contents = File.read(package)
-          contents.gsub! %r{"version": .*$}, %{"version": "#{PROJECT_VERSION}",}
+          contents.gsub! %r{"version": .*$}, %{"version": "#{project_version}",}
           contents.gsub! %r{"(ember[\w-]*)": [^,\n]+(,)?$} do
-            %{"#{$1}": "#{PROJECT_VERSION}"#{$2}}
+            %{"#{$1}": "#{project_version}"#{$2}}
           end
 
           open(package, "w") { |file| file.write contents }
-        end
-
-        # Bump ember-metal/core version
-        contents = File.read("packages/ember-metal/lib/core.js")
-        current_version = contents.match(/Ember.VERSION = '([\w\.-]+)';$/) && $1
-        contents.gsub!(current_version, PROJECT_VERSION);
-
-        open("packages/ember-metal/lib/core.js", "w") do |file|
-          file.write contents
         end
       end
     end
@@ -68,14 +70,14 @@ namespace :ember do
       puts "Commiting Version Bump"
       unless pretend?
         sh("git reset")
-        sh(%{git add VERSION CHANGELOG Gemfile.lock packages/ember-metal/lib/core.js ember.json packages/**/package.json})
-        sh("git commit -m 'Version bump - #{PROJECT_VERSION}'")
+        sh(%{git add VERSION CHANGELOG Gemfile.lock ember.json packages/**/package.json})
+        sh("git commit -m 'Version bump - #{project_version}'")
       end
     end
 
     desc "Tag new version"
     task :tag do
-      sh("git tag v#{PROJECT_VERSION}") unless pretend?
+      sh("git tag v#{project_version}") unless pretend?
     end
 
     desc "Push new commit to git"
@@ -94,9 +96,14 @@ namespace :ember do
     end
 
     desc "Prepare for a new release"
-    task :prepare => [:update, :changelog, :bump_version]
+    task :prepare => [:update, :remove_version_metadata, :changelog, :bump_version]
 
     desc "Commit the new release"
-    task :deploy => [:commit, :tag, :push]
+    task :deploy => [:commit, :tag, :push] do
+      puts "Please make sure to publish the new tagged release to S3.\nEnsure that the S3 credentials in in your ENV and run `rake publish_build`."
+    end
+
+    desc "Update versions post release."
+    task :after_deploy_version_bump => [:bump_version, :commit, :push]
   end
 end

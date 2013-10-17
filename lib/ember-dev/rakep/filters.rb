@@ -102,21 +102,28 @@ class JSHintRC < Rake::Pipeline::Filter
   end
 end
 
-class VersionInfo < Rake::Pipeline::Filter
-  def version_info
-    @version_info ||= begin
-      out = ""
+class AddProjectVersionNumber < Rake::Pipeline::Filter
+  def version
+    @version ||= EmberDev::VersionCalculator.new.version
+  end
 
-      unless `git tag`.empty?
-        latest_tag = `git describe --tags`
-        out << "// Version: #{latest_tag}"
-      end
-
-      last_commit = `git log -n 1 --format="%h (%ci)"`
-      out << "// Last commit: #{last_commit}"
-
-      out
+  def generate_output(inputs, output)
+    inputs.each do |input|
+      # Bump ember-metal/core version
+      contents = File.read(input.fullpath)
+      contents.gsub!(/VERSION_STRING_PLACEHOLDER/, version)
+      output.write contents
     end
+  end
+end
+
+class VersionInfo < Rake::Pipeline::Filter
+  def version
+    @version ||= EmberDev::VersionCalculator.new.version
+  end
+
+  def version_info
+    @version_info ||= " // Version: #{version}"
   end
 
   def generate_output(inputs, output)

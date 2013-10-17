@@ -20,6 +20,8 @@ input "packages" do
 
   match  "#{EmberDev.config.dasherized_name}-tests.js" do
     filter JSHintRC
+    filter VersionInfo
+    filter EmberLicenseFilter
   end
 end
 
@@ -40,6 +42,12 @@ input "packages" do
       instance_eval ember_spade_postprocess
     end
   end
+
+  match  "#{EmberDev.config.dasherized_name}-spade.js" do
+    filter VersionInfo
+    filter EmberLicenseFilter
+    filter AddProjectVersionNumber
+  end
 end
 
 input "packages" do
@@ -57,6 +65,8 @@ input "packages" do
     ) do |filename|
       File.join("modules/", filename.gsub('/lib/main.js', '.js'))
     end
+
+    filter AddProjectVersionNumber
   end
 end
 

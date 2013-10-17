@@ -11,7 +11,9 @@ module EmberDev
 
     let(:docs_root) { tmpdir + '/docs' }
     let(:yuidoc_config_file) { docs_root + '/yuidoc.json' }
-    let(:generator) { DocumentationGenerator.new(docs_root) }
+    let(:generator) { DocumentationGenerator.new(docs_root, 'build/data.json', mock_version_calc) }
+    let(:mock_version_calc) { Minitest::Mock.new }
+    let(:random_version) { SecureRandom.urlsafe_base64 }
 
     def touch(path)
       FileUtils.mkdir_p File.dirname(path)
@@ -29,10 +31,22 @@ module EmberDev
 
     before do
       setup_yuidoc_config
+      mock_version_calc.expect :version, random_version
     end
 
     it "can accept the documentation directory on initialize" do
       DocumentationGenerator.new(docs_root)
+    end
+
+    it "uses VersionCalculator to find the current version number" do
+      mock_calculator = Minitest::Mock.new
+      mock_calculator.expect :version, 'BLAHZORZ'
+
+      VersionCalculator.stub :new, mock_calculator do
+        generator = DocumentationGenerator.new(docs_root)
+
+        assert_equal 'BLAHZORZ', generator.version
+      end
     end
 
     describe "knows when it can't generate documentation" do

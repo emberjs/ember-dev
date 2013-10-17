@@ -99,7 +99,9 @@ namespace :ember do
     task :prepare => [:update, :remove_version_metadata, :changelog, :bump_version]
 
     desc "Commit the new release"
-    task :deploy => [:commit, :tag, :push]
+    task :deploy => [:commit, :tag, :push] do
+      puts "Please make sure to publish the new tagged release to S3.\nEnsure that the S3 credentials in in your ENV and run `rake publish_build`."
+    end
 
     desc "Update versions post release."
     task :after_deploy_version_bump => [:bump_version, :commit, :push]

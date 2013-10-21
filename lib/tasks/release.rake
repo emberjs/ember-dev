@@ -8,7 +8,7 @@ namespace :ember do
     end
 
     def project_version
-      VersionCalculator.new.version
+      EmberDev::VersionCalculator.new.version
     end
 
     desc "Update repo"

@@ -11,7 +11,10 @@ namespace :ember do
 
     params = {}
     params[:selected_suite] = args[:suite] if args[:suite]
-    params[:enable_multi_branch_tests] = true if ENV['CI']
+
+    if ENV['MULTI_BRANCH_TESTS'] || ENV['TRAVIS_PULL_REQUEST']
+      params[:enable_multi_branch_tests] = true
+    end
 
     test_support = EmberDev::TestSupport.new(params)
 

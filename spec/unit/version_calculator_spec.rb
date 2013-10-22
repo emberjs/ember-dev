@@ -4,7 +4,7 @@ require_relative '../../lib/ember-dev/version_calculator'
 
 module EmberDev
   describe VersionCalculator do
-    include TestSupport::TmpdirHelpers
+    include TmpdirHelpers
 
     let(:calc) { VersionCalculator.new options}
     let(:options) do

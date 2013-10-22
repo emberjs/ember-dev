@@ -82,10 +82,6 @@ module EmberDev
       @commits_by_branch = ret
     end
 
-    def features_file_is_available?
-      File.exists?('features.json')
-    end
-
     private
 
     def build_suites
@@ -119,9 +115,7 @@ module EmberDev
       packages.each do |package|
         output << "package=#{package}"
 
-        unless features_file_is_available?
-          output << "package=#{package}&enableallfeatures=true"
-        end
+        output << "package=#{package}&enableoptionalfeatures=true"
       end
 
       output

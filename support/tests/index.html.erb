@@ -172,6 +172,13 @@
     // Close the script tag to make sure document.write happens
   </script>
 
+  <% if File.exists?("features.json") %>
+    <script type="text/javascript">
+      window.ENV = window.ENV || {};
+      window.ENV.FEATURES = <%= File.read("features.json") %>
+    </script>
+  <% end %>
+
   <% if File.exist?("tests/ember_configuration.js") %>
     <script type="text/javascript">
       <%= File.read("tests/ember_configuration.js") %>

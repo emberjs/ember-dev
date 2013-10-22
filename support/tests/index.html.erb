@@ -172,12 +172,17 @@
     // Close the script tag to make sure document.write happens
   </script>
 
-  <% if File.exists?("features.json") %>
-    <script type="text/javascript">
-      window.ENV = window.ENV || {};
+  <script type="text/javascript">
+    window.ENV = window.ENV || {};
+
+    <% if File.exists?("features.json") %>
       window.ENV.FEATURES = <%= File.read("features.json") %>
-    </script>
-  <% end %>
+    <% else %>
+      // Handle testing feature flags
+      QUnit.config.urlConfig.push({ id: 'enableallfeatures', label: "Enable All Features"});
+      window.ENV['ENABLE_ALL_FEATURES'] = !!QUnit.urlParams.enableallfeatures;
+    <% end %>
+  </script>
 
   <% if File.exist?("tests/ember_configuration.js") %>
     <script type="text/javascript">

@@ -19,7 +19,15 @@
   var originalModule = module;
   module = function(name, origOpts) {
     var opts = {};
-    if (origOpts && origOpts.setup) { opts.setup = origOpts.setup; }
+
+    opts.setup = function() {
+      if (EmberDev.beforeEach) {
+        EmberDev.beforeEach();
+      }
+
+      if (origOpts && origOpts.setup) { origOpts.setup(); }
+    }
+
     opts.teardown = function() {
       if (origOpts && origOpts.teardown) { origOpts.teardown(); }
 

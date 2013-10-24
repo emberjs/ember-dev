@@ -191,14 +191,21 @@
   <% end %>
 
   <% unless EmberDev.config.testing_ember %>
-      <script type="text/javascript">
-        <% if static? %>
-          loadScript('https://s3.amazonaws.com/builds.emberjs.com/release/ember.js');
-        <% else %>
-          loadScript('/ember.js');
-        <% end %>
-        // Close the script tag to make sure document.write happens
-      </script>
+    <script type="text/javascript">
+      var emberChannel = QUnit.urlParams.emberchannel || "release", emberPath;
+
+      <% if !static? && defined?(Ember::Source) %>
+        if (emberChannel === "release") {
+          emberPath = '/ember.js';
+        }
+      <% end %>
+
+      if (!emberPath) {
+        emberPath = 'https://s3.amazonaws.com/builds.emberjs.com/' + emberChannel + '/ember.js';
+      }
+
+      loadScript(emberPath);
+    </script>
   <% end %>
 
   <% if EmberDev.config.testing_needs_ember_data %>

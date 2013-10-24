@@ -36,12 +36,16 @@ module EmberDev
       @documentation_path.join('yuidoc.json').exist?
     end
 
+    def yuidoc_path
+      Pathname.new("node_modules/yuidocjs/lib/cli.js")
+    end
+
     def yuidoc_available?
-      system("which yuidoc > /dev/null 2>&1")
+      yuidoc_path.exist?
     end
 
     def run_yuidoc
-      @yuidoc_ran = system("cd #{@documentation_path} && yuidoc -p -q --project-version #{version}")
+      @yuidoc_ran = system("cd #{@documentation_path} && #{yuidoc_path.realpath} -p -q --project-version #{version}")
     end
   end
 end

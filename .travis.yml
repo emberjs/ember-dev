@@ -3,7 +3,7 @@ rvm:
 - 1.9.3
 install:
 - bundle install
-- npm install -g defeatureify yuidocjs
+- npm install defeatureify yuidocjs
 before_script:
 - rake setup_test_repos
 script: "bundle exec rake test:$TEST_SUITE"

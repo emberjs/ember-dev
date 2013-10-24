@@ -29,6 +29,7 @@ describe "Properly run a multi-branch test." do
     with_clean_env do
       override_gemfile
 
+      assert system("npm install defeatureify")
       assert system("bundle update ember-dev")
       assert system("rake test")
     end

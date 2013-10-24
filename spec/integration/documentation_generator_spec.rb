@@ -17,6 +17,7 @@ describe "Can generate the appropriate YUIDocs" do
     with_clean_env do
       override_gemfile
 
+      assert system("npm install yuidocjs")
       assert system("bundle update ember-dev")
       assert system("rake ember:docs")
 
@@ -24,7 +25,7 @@ describe "Can generate the appropriate YUIDocs" do
 
       FileUtils.rm_rf 'docs/build'
 
-      system('cd docs && yuidoc -p -q')
+      system('cd docs && ../node_modules/yuidocjs/lib/cli.js -p -q')
 
       expected_docs = File.read('docs/build/data.json')
 

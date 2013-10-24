@@ -1,7 +1,7 @@
 namespace :ember do
   desc "Run tests with phantomjs"
   task :test, [:suite] => :dist do |t, args|
-    unless sh("which phantomjs > /dev/null 2>&1")
+    unless sh("phantomjs --version > /dev/null 2>&1")
       abort "PhantomJS is not installed. Download from http://phantomjs.org"
     end
 

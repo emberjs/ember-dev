@@ -3,14 +3,29 @@ def pipeline
   Rake::Pipeline::Project.new(EmberDev.config.assetfile)
 end
 
+def ensure_defeatureify
+  return unless File.exists?('features.json')
+
+  command_path = 'node_modules/defeatureify/bin/cli.js'
+
+  unless File.exists?(command_path)
+    abort "You have a `features.json` file, but defeatureify is not installed. You can install it with:\n\tnpm install defeatureify"
+  end
+
+  required_version  = '~> 0.1.4'
+  installed_version = `#{command_path} --version`.chomp
+
+  unless Gem::Requirement.new(required_version) =~ Gem::Version.new(installed_version)
+    abort "`defeatureify` (#{required_version}) is required, but we found (#{installed_version}) in '#{command_path}'. You can install it with:\n\tnpm install defeatureify"
+  end
+end
+
 config = EmberDev.config
 
 namespace :ember do
   desc "Build ember.js"
   task :dist do
-    if File.exists?('features.json') && !system("which defeatureify > /dev/null 2>&1")
-      abort "You have a `features.json` file, but defeatureify is not installed. You can install it with:\nnpm install -g defeatureify."
-    end
+    ensure_defeatureify
 
     puts "Building #{config.name}..."
     pipeline.invoke

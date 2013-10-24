@@ -1,11 +1,11 @@
 namespace :ember do
   desc "Run tests with phantomjs"
   task :test, [:suite] => :dist do |t, args|
-    unless sh("which phantomjs > /dev/null 2>&1")
+    unless sh("phantomjs --version > /dev/null 2>&1")
       abort "PhantomJS is not installed. Download from http://phantomjs.org"
     end
 
-    if File.exists?('features.json') && !sh("which defeatureify > /dev/null 2>&1")
+    if File.exists?('features.json') && !sh("defeatureify --version > /dev/null 2>&1")
       abort "You have a `features.json` file, but defeatureify is not installed. You can install it with:\nnpm install -g defeatureify."
     end
 

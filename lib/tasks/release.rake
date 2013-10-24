@@ -1,4 +1,3 @@
-require 'bundler/gem_tasks'
 require 'ember-dev'
 
 namespace :ember do
@@ -96,11 +95,17 @@ namespace :ember do
       end
     end
 
+    desc "Release gem with bundler/gem_tasks."
+    task :release_gem do
+      require 'bundler/gem_tasks'
+      Rake::Task['release'].execute
+    end
+
     desc "Prepare for a new release"
     task :prepare => [:update, :remove_version_metadata, :changelog, :bump_version]
 
     desc "Commit the new release"
-    task :deploy => [:commit, :tag, :push, :release] do
+    task :deploy => [:commit, :tag, :push, :release_gem] do
       puts "Please make sure to publish the new tagged release to S3.\nEnsure that the S3 credentials in in your ENV and run `rake publish_build`."
     end
 

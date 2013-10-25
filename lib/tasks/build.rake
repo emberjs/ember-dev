@@ -8,6 +8,10 @@ config = EmberDev.config
 namespace :ember do
   desc "Build ember.js"
   task :dist do
+    if File.exists?('features.json') && !system("which defeatureify > /dev/null 2>&1")
+      abort "You have a `features.json` file, but defeatureify is not installed. You can install it with:\nnpm install -g defeatureify."
+    end
+
     puts "Building #{config.name}..."
     pipeline.invoke
     puts "Done"

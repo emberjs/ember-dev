@@ -14,6 +14,7 @@ describe "Can run the full Ember.js test suite" do
     with_clean_env do
       override_gemfile
 
+      assert system("npm install defeatureify")
       assert system("bundle update ember-dev")
       assert system("RUBYOPT='-r#{@original_working_directory}/lib/ember-dev' rake test\\[standard]")
     end

@@ -1,2 +1,3 @@
 spec/support/test_repos/
 Gemfile.lock
+node_modules/

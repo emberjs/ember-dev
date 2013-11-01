@@ -36,7 +36,7 @@ class HandlebarsPrecompiler < Rake::Pipeline::Filter
 exports = {};
 
 // This is necessary to browserify the ember-template-compiler node module,
-// which needs to `require('handlebars')`. A more complex solution may 
+// which needs to `require('handlebars')`. A more complex solution may
 // be desirable in the future if ember-template-compiler needs to require more modules.
 function require() {
   #{File.read(Handlebars::Source.bundled_path)};
@@ -177,8 +177,8 @@ end
 class EmberDefeatureify < Rake::Pipeline::Filter
   def generate_output(inputs, output)
     inputs.each do |input|
-      src = if File.exists?("features.json")
-              `defeatureify #{input.fullpath} -w features.json`
+      src = if File.exists?('features.json') && File.exists?('node_modules/defeatureify/bin/cli.js')
+              `./node_modules/defeatureify/bin/cli.js #{input.fullpath} -w features.json`
             else
               input.read
             end

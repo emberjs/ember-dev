@@ -210,7 +210,25 @@
 
   <% if EmberDev.config.testing_needs_ember_data %>
     <script type="text/javascript">
-      loadScript('/ember-data.js');
+      var emberDataChannel = QUnit.urlParams.emberdatachannel || "beta", emberDataPath;
+
+      <% if !static? && defined?(Ember::Data::Source) %>
+        <% if Ember::Data::VERSION =~ /\A[\d.]+\z/ %>
+          if (emberDataChannel === "release") {
+            emberDataPath = '/ember-data.js';
+          }
+        <% else if Ember::Data::VERSION =~ /beta/ %>
+          if (emberDataChannel === "beta") {
+            emberDataPath = '/ember-data.js';
+          }
+        <% end %>
+      <% end %>
+
+      if (!emberDataPath) {
+        emberDataPath = 'https://s3.amazonaws.com/builds.emberjs.com/' + emberDataChannel + '/ember-data.js';
+      }
+
+      loadScript(emberDataPath);
       // Close the script tag to make sure document.write happens
     </script>
   <% end %>

@@ -187,3 +187,11 @@ class EmberDefeatureify < Rake::Pipeline::Filter
     end
   end
 end
+
+class ClosureWrappingConcat < Rake::Pipeline::ConcatFilter
+  def generate_output(inputs, output)
+    inputs.each do |input|
+      output.write "(function() {\n#{input.read}\n})();\n\n"
+    end
+  end
+end

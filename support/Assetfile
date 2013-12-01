@@ -70,4 +70,14 @@ input "packages" do
   end
 end
 
+input "packages" do
+  match "*/tests/**/*_test.js" do
+    filter ClosureWrappingConcat do |filename|
+      File.join("modules/",filename.gsub(%r{/tests/.+_test.js}, '-tests.js'))
+    end
+
+    filter AddProjectVersionNumber
+  end
+end
+
 # vim: filetype=ruby

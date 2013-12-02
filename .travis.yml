@@ -6,6 +6,7 @@ install:
 - npm install defeatureify yuidocjs
 before_script:
 - rake setup_test_repos
+- sudo apt-get update && sudo apt-get install git
 script: "bundle exec rake test:$TEST_SUITE"
 env:
 - TEST_SUITE=unit

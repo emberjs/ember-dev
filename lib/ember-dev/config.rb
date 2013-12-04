@@ -15,6 +15,7 @@ module EmberDev
     attr_accessor :testing_additional_requires
     attr_accessor :testing_needs_ember_data
     attr_accessor :testing_ember
+    attr_accessor :dasherized_name
 
     def initialize(hash)
       hash.each{|k,v| send("#{k}=", v) }
@@ -24,7 +25,7 @@ module EmberDev
     end
 
     def dasherized_name
-      name.downcase.gsub(' ','-')
+      @dasherized_name ||= name.downcase.gsub(' ','-')
     end
   end
 end

@@ -64,12 +64,27 @@ module EmberDev
       existing_commits = git_command("git rev-list --max-count=50 HEAD")
       return true if existing_commits.include?(sha)
 
+      ensure_user_config
+
       git_command("git cherry-pick -x #{sha}")
 
       $?.success?
     end
 
+    def user_name
+      git_command "git config user.name"
+    end
+
+    def user_email
+      git_command "git config user.email"
+    end
+
     private
+
+    def ensure_user_config
+      git_command(%{git config user.email "ember-dev@localhost"}) if user_email.empty?
+      git_command %{git config user.name "ember-dev"} if user_name.empty?
+    end
 
     def branches_containing_commit(commit = current_revision)
       git_command("git branch --all --contains #{current_revision}")

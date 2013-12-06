@@ -218,5 +218,44 @@ describe EmberDev::GitSupport do
 
       refute git_support.cherry_pick(cherry_picked_sha)
     end
+
+    describe 'when user.name and user.email are not present' do
+      before do
+        @original_git_config = ENV['GIT_CONFIG']
+        ENV['GIT_CONFIG'] = 'local'
+
+        in_repo_dir repo_path do
+          @original_email = `git config user.email`
+          @original_name  = `git config user.name`
+
+          `git config --unset user.email`
+          `git config --unset user.name`
+        end
+      end
+
+      after do
+        in_repo_dir repo_path do
+          `git config user.email "#{@original_email}"`
+          `git config user.name "#{@original_name}"`
+        end
+
+        if @original_git_config
+          ENV['GIT_CONFIG'] = @original_git_config
+        else
+          ENV.delete('GIT_CONFIG')
+        end
+      end
+
+      it "assigns the user.name and user.email values to a temp setting" do
+        git_support.cherry_pick(cherry_picked_sha)
+
+        in_repo_dir repo_path do
+          assert `git log --grep="#{cherry_picked_sha}"`.include?(cherry_picked_sha)
+
+          assert_equal 'ember-dev@localhost', `git config user.email`.chomp
+          assert_equal 'ember-dev', `git config user.name`.chomp
+        end
+      end
+    end
   end
 end

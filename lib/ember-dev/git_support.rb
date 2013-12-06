@@ -72,11 +72,11 @@ module EmberDev
     end
 
     def user_name
-      git_command "git config user.name"
+      git_command "git config user.name", true # ignore failures
     end
 
     def user_email
-      git_command "git config user.email"
+      git_command "git config user.email", true # ignore failures
     end
 
     private
@@ -93,14 +93,14 @@ module EmberDev
         .collect{|r| r.gsub(/[\s\*]/, '') }
     end
 
-    def git_command(command_to_run)
+    def git_command(command_to_run, ignore_failures = false)
       result =  Dir.chdir(repo_path) do
                   IO.popen(command_to_run, :err=>[:child, :out]) do |io|
                     io.read.chomp
                   end
                 end
 
-      if !$?.success? && @debug
+      if !$?.success? && @debug && !ignore_failures
         puts "The git command failed: '#{command_to_run}'\n"
         puts "  Using git version: #{@git_version}"
         puts "  Call stack: ", *caller.map{|s| "    #{s}" }

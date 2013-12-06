@@ -45,7 +45,7 @@ Standard Pull Request process:
   also we will perform the following:
   * Turn Travis's shallow repo into a full repo. (`git fetch --unshallow`)
   * Checkout the secondary branch (let's assume beta). (`git checkout beta`)
-  * Cherry pick the specific commits in question. (`git cherry-pick <SHA>1)
+  * Cherry pick the specific commits in question. (`git cherry-pick <SHA>1`)
   * Run full test suite against affected branch.
 3. Repeat until all branches have been tested.
 

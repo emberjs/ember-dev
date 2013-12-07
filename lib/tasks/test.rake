@@ -12,6 +12,10 @@ namespace :ember do
       params[:enable_multi_branch_tests] = true
     end
 
+    if ENV['FORCE_BRANCH']
+      params[:force_branch] = ENV['FORCE_BRANCH']
+    end
+
     test_support = EmberDev::TestSupport.new(params)
 
     unless test_support.test_runs

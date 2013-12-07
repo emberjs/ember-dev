@@ -8,6 +8,7 @@ module EmberDev
       @debug          = options.fetch(:debug)            { true }
       @selected_suite = options.fetch(:selected_suite)   { 'default' }
       @git_support    = options.fetch(:git_support)      { GitSupport.new('.', :debug => @debug) }
+      @force_branch   = options.fetch(:force_branch)     { nil }
       @multi_branch   = options.fetch(:enable_multi_branch_tests) { false }
     end
 
@@ -24,6 +25,15 @@ module EmberDev
     end
 
     def run_all
+      if @force_branch
+        if branches_to_test.include?(@force_branch)
+          return prepare_for_branch_tests(@force_branch) && run_all_tests_on_current_revision
+        else
+          puts "No commits for #{@force_branch}." if debug
+          return true
+        end
+      end
+
       puts "Running tests on #{git_support.current_branch}" if debug
       return false unless run_all_tests_on_current_revision
       return true unless @multi_branch

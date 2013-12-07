@@ -39,10 +39,18 @@ module EmberDev
       puts "Checking out: #{branch}" if debug
       return false unless git_support.checkout(branch)
 
-      commits_by_branch[branch].all? do |commit|
+      return false unless commits_by_branch[branch].all? do |commit|
         puts "Cherry picking #{commit} into #{branch}" if debug
         git_support.cherry_pick(commit)
       end
+
+      build
+    end
+
+    def build
+      backtick("bundle exec rake ember:dist")
+
+      $?.success?
     end
 
     def run_all_tests_on_current_revision
@@ -119,6 +127,11 @@ module EmberDev
       end
 
       output
+    end
+
+    def backtick(command)
+      puts "Running: #{command}"
+      puts `#{command}`
     end
   end
 end

@@ -166,12 +166,26 @@ describe EmberDev::TestSupport do
       git_support_mock.expect(:cherry_pick, true, ['d9afd8d6d5cbe7b'])
       git_support_mock.expect(:make_shallow_clone_into_full_clone, true)
 
+      def support.build; @build_called = true; end
+      def support.build_called; @build_called; end
+
       support.prepare_for_branch_tests('beta')
 
       git_support_mock.verify
+      assert support.build_called
     end
   end
 
+  describe "builds the project" do
+    it "calls `rake dist` to build the project" do
+      def support.backtick(arg); @backtick_calls ||= []; @backtick_calls << arg; end
+      def support.backtick_calls; @backtick_calls; end
+
+      support.build
+
+      assert_equal ["bundle exec rake ember:dist"], support.backtick_calls
+    end
+  end
 
   describe "iterates over each branch and runs tests" do
     let(:git_support_mock) { Minitest::Mock.new }

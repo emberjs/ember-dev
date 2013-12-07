@@ -8,7 +8,9 @@ namespace :ember do
     params = {}
     params[:selected_suite] = args[:suite] if args[:suite]
 
-    if ENV['MULTI_BRANCH_TESTS'] || ENV['TRAVIS_PULL_REQUEST']
+    if value = ENV['MULTI_BRANCH_TESTS']
+      params[:enable_multi_branch_tests] = (value == 'true')
+    elsif ENV['TRAVIS_PULL_REQUEST']
       params[:enable_multi_branch_tests] = true
     end
 

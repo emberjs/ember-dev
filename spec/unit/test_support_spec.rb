@@ -196,7 +196,7 @@ describe EmberDev::TestSupport do
 
       # trap and track each call to 'prepare_for_branch_tests'
       def support.prepare_for_branch_tests_calls
-        @prepare_calls ||= 0
+        @prepare_calls ||= []
       end
       def support.prepare_for_branch_tests(branch)
         @prepare_calls ||= []
@@ -205,7 +205,7 @@ describe EmberDev::TestSupport do
 
       # trap and track each call to 'run_all_tests_on_current_revision'
       def support.run_all_tests_on_current_revision_counter
-        @run_all_counter
+        @run_all_counter ||= 0
       end
       def support.run_all_tests_on_current_revision
         @run_all_counter ||= 0
@@ -226,13 +226,37 @@ describe EmberDev::TestSupport do
       it "does not checkout or cherry-pick" do
         support.run_all
 
-        assert_equal 0, support.prepare_for_branch_tests_calls
+        assert_equal [], support.prepare_for_branch_tests_calls
       end
 
       it "does not compare commit messages" do
         support.run_all
 
         assert_raises(MockExpectationError) { git_support_mock.verify }
+      end
+    end
+
+    describe "when force testing on a single branch" do
+      let(:git_support_mock) { Minitest::Mock.new }
+      let(:support) { EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock, :force_branch => 'beta') }
+
+      it "calls run_all_test once" do
+        support.run_all
+
+        assert_equal 1, support.run_all_tests_on_current_revision_counter
+        assert_equal ['beta'], support.prepare_for_branch_tests_calls
+      end
+    end
+
+    describe "when force testing on a single branch" do
+      let(:git_support_mock) { Minitest::Mock.new }
+      let(:support) { EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock, :force_branch => 'blah') }
+
+      it "does not calls run_all_test on branches with no changes" do
+        support.run_all
+
+        assert_equal 0, support.run_all_tests_on_current_revision_counter
+        assert_equal [], support.prepare_for_branch_tests_calls
       end
     end
 
@@ -257,7 +281,7 @@ describe EmberDev::TestSupport do
 
         assert_equal false, support.run_all
 
-        assert_equal 0, support.prepare_for_branch_tests_calls
+        assert_equal [], support.prepare_for_branch_tests_calls
       end
 
       it "if the second run fails" do

@@ -183,7 +183,7 @@ describe EmberDev::TestSupport do
 
       support.build
 
-      assert_equal ["bundle exec rake ember:dist"], support.backtick_calls
+      assert_equal ["bundle install && bundle exec rake ember:dist"], support.backtick_calls
     end
   end
 

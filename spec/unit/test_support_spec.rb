@@ -3,6 +3,26 @@ require 'minitest/autorun'
 require_relative '../../lib/ember-dev'
 
 describe EmberDev::TestSupport do
+  def trap_prepare_for_branch_tests(support)
+    def support.prepare_for_branch_tests_calls
+      @prepare_calls ||= []
+    end
+    def support.prepare_for_branch_tests(branch)
+      @prepare_calls ||= []
+      @prepare_calls << branch
+    end
+  end
+
+  def trap_run_all_tests_on_current_revision(support)
+    def support.run_all_tests_on_current_revision_counter
+      @run_all_counter ||= 0
+    end
+    def support.run_all_tests_on_current_revision
+      @run_all_counter ||= 0
+      @run_all_counter +=1
+    end
+  end
+
   let(:support) { EmberDev::TestSupport.new(debug: false) }
   let(:packages) { ['fred-flinstone', 'barney-rubble'] }
 
@@ -194,23 +214,8 @@ describe EmberDev::TestSupport do
     before do
       git_support_mock.expect :commits, {'d9afd8d6d5cbe7b' => '[BUGFIX release] Some random message.'}
 
-      # trap and track each call to 'prepare_for_branch_tests'
-      def support.prepare_for_branch_tests_calls
-        @prepare_calls ||= []
-      end
-      def support.prepare_for_branch_tests(branch)
-        @prepare_calls ||= []
-        @prepare_calls << branch
-      end
-
-      # trap and track each call to 'run_all_tests_on_current_revision'
-      def support.run_all_tests_on_current_revision_counter
-        @run_all_counter ||= 0
-      end
-      def support.run_all_tests_on_current_revision
-        @run_all_counter ||= 0
-        @run_all_counter +=1
-      end
+      trap_prepare_for_branch_tests(support)
+      trap_run_all_tests_on_current_revision(support)
     end
 
     describe "by default only tests current branch" do
@@ -236,24 +241,39 @@ describe EmberDev::TestSupport do
       end
     end
 
-    describe "when force testing on a single branch" do
+    describe "knows how to handle forced branches" do
       let(:git_support_mock) { Minitest::Mock.new }
       let(:support) { EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock, :force_branch => 'beta') }
 
-      it "calls run_all_test once" do
-        support.run_all
+      before do
+        git_support_mock.expect :commits, {'d9afd8d6d5cbe7b' => '[BUGFIX release] Some random message.'}
+
+        trap_prepare_for_branch_tests(support)
+        trap_run_all_tests_on_current_revision(support)
+      end
+
+      it "runs tests if commits are found for branch and current_branch is master" do
+        git_support_mock.expect :current_branch, 'master'
+
+        support.handle_force_branch('beta')
 
         assert_equal 1, support.run_all_tests_on_current_revision_counter
         assert_equal ['beta'], support.prepare_for_branch_tests_calls
       end
-    end
 
-    describe "when force testing on a single branch" do
-      let(:git_support_mock) { Minitest::Mock.new }
-      let(:support) { EmberDev::TestSupport.new(debug: false, :git_support => git_support_mock, :force_branch => 'blah') }
+      it "does not run tests if no commits are found for the FORCE_BRANCH" do
+        git_support_mock.expect :current_branch, 'master'
 
-      it "does not calls run_all_test on branches with no changes" do
-        support.run_all
+        support.handle_force_branch('blah')
+
+        assert_equal 0, support.run_all_tests_on_current_revision_counter
+        assert_equal [], support.prepare_for_branch_tests_calls
+      end
+
+      it "does not run tests if not on master" do
+        git_support_mock.expect :current_branch, 'beta'
+
+        support.handle_force_branch
 
         assert_equal 0, support.run_all_tests_on_current_revision_counter
         assert_equal [], support.prepare_for_branch_tests_calls

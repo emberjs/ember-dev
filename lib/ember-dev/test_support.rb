@@ -25,14 +25,7 @@ module EmberDev
     end
 
     def run_all
-      if @force_branch
-        if branches_to_test.include?(@force_branch)
-          return prepare_for_branch_tests(@force_branch) && run_all_tests_on_current_revision
-        else
-          puts "No commits for #{@force_branch}." if debug
-          return true
-        end
-      end
+      return handle_force_branch if @force_branch
 
       puts "Running tests on #{git_support.current_branch}" if debug
       return false unless run_all_tests_on_current_revision
@@ -40,6 +33,18 @@ module EmberDev
 
       branches_to_test.all? do |branch|
         prepare_for_branch_tests(branch) && run_all_tests_on_current_revision
+      end
+    end
+
+    def handle_force_branch(branch = @force_branch)
+      if git_support.current_branch != 'master'
+        puts "Skip FORCE_BRANCH when started on a branch other than master."
+        return true
+      elsif branches_to_test.include?(branch)
+        return prepare_for_branch_tests(branch) && run_all_tests_on_current_revision
+      else
+        puts "No commits for #{branch}." if debug
+        return true
       end
     end
 

@@ -58,7 +58,9 @@ module EmberDev
     end
 
     def build
-      backtick("bundle install && bundle exec rake ember:dist")
+      Bundler.with_clean_env do
+        backtick("bundle install && bundle exec rake ember:dist")
+      end
 
       $?.success?
     end

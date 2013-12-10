@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
-# Usage: save-cache <DIR1> <DIR2>
+# Usage: s3-put <FILE> <S3_BUCKET>[:<PATH>] [<CONTENT_TYPE>]
 #
-# Uploads a .tar.gz file to Amazon S3 (using the current directory name as
-# as the base filename).
+# Uploads a file to the Amazon S3 service.
+# Outputs the URL for the newly uploaded file.
 #
-# Depends on AWS credentials being set via env:
+# Requirements:
 # - S3_ACCESS_KEY_ID
 # - S3_SECRET_ACCESS_KEY
-# - S3_BUILD_CACHE_BUCKET
+# - openssl
+# - curl
 #
-# Outputs the URL of the newly uploaded file.
-#
-# Based on s3-put: https://github.com/sstephenson/ruby-build/blob/4ed38ba4bceafa3f8908a05b58e6bcf219fbbdc3/script/s3-put
+# Author: Mislav Marohnić
 
 set -e
 
@@ -38,31 +37,28 @@ string_to_sign() {
   echo "$content_type"
   echo "$date"
   echo "x-amz-acl:$acl"
-  printf "/$bucket/$file"
+  printf "/$bucket/$remote_path"
 }
 
 date_string() {
   LC_TIME=C date "+%a, %d %h %Y %T %z"
 }
 
-if [ -z "$S3_SECRET_ACCESS_KEY" ] || [ -z "$S3_ACCESS_KEY_ID" ]
-then
-  echo "Enviroment variables not set. Exiting..."
-  exit 0
-fi
+file="$1"
+bucket="${2%%:*}"
+remote_path="${2#*:}"
+content_type="$3"
 
-file="${PWD##*/}.tar.gz"
-bucket="$S3_BUILD_CACHE_BUCKET"
-content_type="application/x-gzip"
+if [ -z "$remote_path" ] || [ "$remote_path" = "$bucket" ]; then
+  remote_path="${file##*/}"
+fi
 
 http_method=PUT
 acl="public-read"
 content_md5="$(bin_md5 < "$file" | base64)"
 date="$(date_string)"
 
-url="https://$bucket.s3.amazonaws.com/$file"
-
-tar -czf "$file" $@
+url="https://$bucket.s3.amazonaws.com/$remote_path"
 
 curl -qsSf -T "$file" \
   -H "Authorization: $(authorization)" \
@@ -72,4 +68,6 @@ curl -qsSf -T "$file" \
   -H "Content-Type: $content_type" \
   "$url"
 
-echo "Cache uploaded to: $url"
+echo "$url"
+
+# vim: filetype=sh

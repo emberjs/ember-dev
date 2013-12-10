@@ -1,5 +1,7 @@
 rvm:
 - 1.9.3
+node_js:
+- "0.10"
 install:
 - bin/cached-bundle install --path vendor/bundle
 - bin/cached-npm install defeatureify yuidocjs

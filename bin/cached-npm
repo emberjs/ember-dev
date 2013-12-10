@@ -30,7 +30,7 @@ download() {
 script_dir=$(dirname "${BASH_SOURCE[0]}")
 bundle_path="node_modules"
 cache_busting_hash="$(compute_md5 < package.json)"
-cache_name="${TRAVIS_NODE_VERSION}-${cache_busting_hash}.tgz"
+cache_name="npm-${TRAVIS_NODE_VERSION}-${cache_busting_hash}.tgz"
 fetch_url="https://${S3_BUILD_CACHE_BUCKET}.s3.amazonaws.com/${TRAVIS_REPO_SLUG}/${cache_name}"
 
 if download "$fetch_url" "$cache_name"; then

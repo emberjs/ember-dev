@@ -11,7 +11,7 @@ url="https://$S3_BUILD_CACHE_BUCKET.s3.amazonaws.com/$file"
 if curl --output /dev/null --silent --head --fail "$url"; then
   echo "Downloading cache from: $url"
   curl -O "$url"
-  tar -xvzf "$file"
+  tar -xzf "$file"
   rm "$file"
 else
   echo "No cache found at: $url"

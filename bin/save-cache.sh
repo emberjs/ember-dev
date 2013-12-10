@@ -62,7 +62,7 @@ date="$(date_string)"
 
 url="https://$bucket.s3.amazonaws.com/$file"
 
-tar -cvzf "$file" $@
+tar -czf "$file" $@
 
 curl -qsSf -T "$file" \
   -H "Authorization: $(authorization)" \

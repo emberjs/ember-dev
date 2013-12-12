@@ -20,35 +20,49 @@
       document.write(unescape('%3Cscript src="'+url+'"%3E%3C/script%3E'));
     };
 
-    var EmberDev = {};
+    var EmberDev = {}, originalViews, originalTemplates;
 
-    EmberDev.afterEach = function() {
-      if (Ember && Ember.View) {
-        var viewIds = [], id;
-        for (id in Ember.View.views) {
-          if (Ember.View.views[id] != null) {
-            viewIds.push(id);
+    EmberDev.beforeEach = function(){
+      function clone(obj){
+        var target = {};
+        for (var i in obj) {
+          if (obj.hasOwnProperty(i)) {
+            target[i] = obj[i];
           }
         }
+        return target;
+      }
 
-        if (viewIds.length > 0) {
-          deepEqual(viewIds, [], "Ember.View.views should be empty");
-          Ember.View.views = [];
-        }
+      if (Ember && Ember.View) {
+        originalViews = clone(Ember.View.views);
       }
 
       if (Ember && Ember.TEMPLATES) {
-        var templateNames = [], name;
-        for (name in Ember.TEMPLATES) {
-          if (Ember.TEMPLATES[name] != null) {
-            templateNames.push(name);
+        originalTemplates = clone(Ember.TEMPLATES);
+      }
+    }
+
+    EmberDev.afterEach = function() {
+      if (Ember && Ember.View) {
+        var id;
+        for (id in Ember.View.views) {
+          if (!QUnit.equiv(Ember.View.views[id], originalViews[id])) {
+            ok(false, "Ember.View.views['" + id + "'] has changed from its original value.");
           }
         }
 
-        if (templateNames.length > 0) {
-          deepEqual(templateNames, [], "Ember.TEMPLATES should be empty");
-          Ember.TEMPLATES = {};
+        Ember.View.views = originalViews;
+      }
+
+      if (Ember && Ember.TEMPLATES) {
+        var name;
+        for (name in Ember.TEMPLATES) {
+          if (!QUnit.equiv(Ember.TEMPLATES[name], originalTemplates[name])) {
+            ok(false, "Ember.TEMPLATES['" + name + "'] has changed from its original value.");
+          }
         }
+
+        Ember.TEMPLATES = originalTemplates;
       }
     };
   </script>

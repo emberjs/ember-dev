@@ -298,7 +298,7 @@
               var jshintModule = moduleName;
               module(jshintModule);
               test('should pass jshint', function() {
-                var passed = JSHINT(minispade.modules[jshintModule], JSHINTRC),
+                var passed = JSHINT(minispade.modules[jshintModule], JSHINTRC, JSHINTRC && JSHINTRC.globals),
                     errors = EmberDev.jsHintReporter(jshintModule, JSHINT.errors);
                 ok(passed, jshintModule+" should pass jshint."+(errors ? "\n"+errors : ''));
               });

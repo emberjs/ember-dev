@@ -20,8 +20,8 @@ input "packages" do
 
   match  "#{EmberDev.config.dasherized_name}-tests.js" do
     filter JSHintRC
-    filter VersionInfo
     filter EmberLicenseFilter
+    filter AddProjectVersionNumber
   end
 end
 
@@ -44,7 +44,6 @@ input "packages" do
   end
 
   match  "#{EmberDev.config.dasherized_name}-spade.js" do
-    filter VersionInfo
     filter EmberLicenseFilter
     filter AddProjectVersionNumber
   end

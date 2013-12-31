@@ -13,7 +13,7 @@ def ensure_defeatureify
   end
 
   required_version  = '~> 0.1.4'
-  installed_version = `#{command_path} --version`.chomp
+  installed_version = `node #{command_path} --version`.chomp
 
   unless Gem::Requirement.new(required_version) =~ Gem::Version.new(installed_version)
     abort "`defeatureify` (#{required_version}) is required, but we found (#{installed_version}) in '#{command_path}'. You can install it with:\n\tnpm install defeatureify"

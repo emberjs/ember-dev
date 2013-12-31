@@ -177,8 +177,8 @@ end
 class EmberDefeatureify < Rake::Pipeline::Filter
   def generate_output(inputs, output)
     inputs.each do |input|
-      src = if File.exists?('features.json') && File.exists?('node_modules/defeatureify/bin/cli.js')
-              `./node_modules/defeatureify/bin/cli.js #{input.fullpath} -w features.json`
+      src = if File.exists?('features.json') && File.exists?('node_modules/.bin/defeatureify')
+              `node ./node_modules/.bin/defeatureify #{input.fullpath} -w features.json`
             else
               input.read
             end

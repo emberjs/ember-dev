@@ -25,7 +25,7 @@ describe "Can generate the appropriate YUIDocs" do
 
       FileUtils.rm_rf 'docs/build'
 
-      system('cd docs && ../node_modules/yuidocjs/lib/cli.js -p -q')
+      system('cd docs && node ../node_modules/.bin/yuidoc -p -q')
 
       expected_docs = File.read('docs/build/data.json')
 

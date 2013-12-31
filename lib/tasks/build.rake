@@ -6,7 +6,7 @@ end
 def ensure_defeatureify
   return unless File.exists?('features.json')
 
-  command_path = 'node_modules/defeatureify/bin/cli.js'
+  command_path = 'node_modules/.bin/defeatureify'
 
   unless File.exists?(command_path)
     abort "You have a `features.json` file, but defeatureify is not installed. You can install it with:\n\tnpm install defeatureify"

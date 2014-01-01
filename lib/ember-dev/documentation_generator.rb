@@ -37,7 +37,7 @@ module EmberDev
     end
 
     def yuidoc_path
-      Pathname.new("node_modules/yuidocjs/lib/cli.js")
+      Pathname.new("node_modules/.bin/yuidoc")
     end
 
     def yuidoc_available?

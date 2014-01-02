@@ -12,7 +12,7 @@ def ensure_defeatureify
     abort "You have a `features.json` file, but defeatureify is not installed. You can install it with:\n\tnpm install defeatureify"
   end
 
-  required_version  = '~> 0.1.4'
+  required_version  = '~> 0.2.0'
   installed_version = `#{command_path} --version`.chomp
 
   unless Gem::Requirement.new(required_version) =~ Gem::Version.new(installed_version)

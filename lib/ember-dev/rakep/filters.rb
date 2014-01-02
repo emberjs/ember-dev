@@ -3,31 +3,6 @@ require "json"
 require "execjs"
 require "handlebars/source"
 
-class EmberStripDebugMessagesFilter < Rake::Pipeline::Filter
-  def strip_debug(data)
-    # Strip debug code
-    data.gsub!(%r{^(\s)*Ember\.(assert|deprecate|warn|debug)\((.*)\).*$}, "")
-  end
-
-  def add_localhost_warning(data)
-    data << "\n\n" + <<END
-if (typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-  Ember.Logger.warn("You are running a production build of Ember on localhost and won't receive detailed error messages. "+
-               "If you want full error messages please use the non-minified build provided on the Ember website.");
-}
-END
-  end
-
-  def generate_output(inputs, output)
-    inputs.each do |input|
-      result = File.read(input.fullpath)
-      strip_debug(result)
-      add_localhost_warning(result)
-      output.write result
-    end
-  end
-end
-
 class HandlebarsPrecompiler < Rake::Pipeline::Filter
   class << self
     def context
@@ -175,15 +150,19 @@ class EmberAddMicroLoader < Rake::Pipeline::Filter
 end
 
 class EmberDefeatureify < Rake::Pipeline::Filter
+  def defeatureify(input, strib_debug = false)
+    if File.exists?('features.json') && File.exists?('node_modules/.bin/defeatureify')
+      options = " --stripdebug " if strib_debug
+
+      `./node_modules/.bin/defeatureify #{input.fullpath} --config features.json #{options}`
+    else
+      input.read
+    end
+  end
+
   def generate_output(inputs, output)
     inputs.each do |input|
-      src = if File.exists?('features.json') && File.exists?('node_modules/.bin/defeatureify')
-              `./node_modules/.bin/defeatureify #{input.fullpath} -w features.json`
-            else
-              input.read
-            end
-
-      output.write src
+      output.write defeatureify(input)
     end
   end
 end
@@ -192,6 +171,25 @@ class ClosureWrappingConcat < Rake::Pipeline::ConcatFilter
   def generate_output(inputs, output)
     inputs.each do |input|
       output.write "(function() {\n#{input.read}\n})();\n\n"
+    end
+  end
+end
+
+class EmberStripDebugMessagesFilter < EmberDefeatureify
+  def add_localhost_warning(data)
+    data << "\n\n" + <<END
+if (typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  Ember.Logger.warn("You are running a production build of Ember on localhost and won't receive detailed error messages. "+
+               "If you want full error messages please use the non-minified build provided on the Ember website.");
+}
+END
+  end
+
+  def generate_output(inputs, output)
+    inputs.each do |input|
+      result = defeatureify(input, true)
+      add_localhost_warning(result)
+      output.write result
     end
   end
 end

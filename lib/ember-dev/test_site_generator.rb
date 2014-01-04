@@ -1,4 +1,5 @@
 require 'erb'
+require 'json'
 require 'fileutils'
 
 module EmberDev
@@ -45,6 +46,13 @@ module EmberDev
 
     def jshint_source
       asset_root_path.join('jshint.js').read
+    end
+
+    def features
+      return "{}" unless File.exist?('features.json')
+
+      json = JSON.parse(File.read('features.json'))
+      json['features'].to_json
     end
 
     private

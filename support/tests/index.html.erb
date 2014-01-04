@@ -176,9 +176,7 @@
     // Handle testing feature flags
     window.ENV = window.ENV || {};
 
-    <% if File.exists?("features.json") %>
-      window.ENV.FEATURES = <%= File.read("features.json") %>
-    <% end %>
+    window.ENV.FEATURES = <%= features %>
 
     QUnit.config.urlConfig.push({ id: 'enableoptionalfeatures', label: "Enable Opt Features"});
     window.ENV['ENABLE_OPTIONAL_FEATURES'] = !!QUnit.urlParams.enableoptionalfeatures;

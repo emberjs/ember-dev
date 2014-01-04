@@ -84,5 +84,13 @@ module EmberDev
 
       assert expected_output == generator.jshint_source
     end
+
+    it "returns the features portion of features.json" do
+      expected_output = '{"blah-feature":true}'
+
+      Dir.chdir 'spec/support' do
+        assert_equal generator.features, expected_output
+      end
+    end
   end
 end

@@ -48,6 +48,9 @@
   // Tests should time out after 5 seconds
   QUnit.config.testTimeout = 5000;
 
+  // Hide passed tests by default
+  QUnit.config.hidepassed = true;
+
   // Handle JSHint
   QUnit.config.urlConfig.push('nojshint');
 

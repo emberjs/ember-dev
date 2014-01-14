@@ -315,7 +315,12 @@
     if (!test) {
       ok(false, 'Assertion failed: ' + msg);
     }
-  }
+  };
+  // Make Ember.deprecate quiet, unless RAISE_ON_DEPRECATION
+  Ember.deprecate = function(message, test) {
+    if (test) { return; }
+    if (Ember.ENV.RAISE_ON_DEPRECATION) { throw new Ember.Error(message); }
+  };
   </script>
 
 </body>

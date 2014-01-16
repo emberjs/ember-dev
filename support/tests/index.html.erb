@@ -20,9 +20,9 @@
       document.write(unescape('%3Cscript src="'+url+'"%3E%3C/script%3E'));
     };
 
-    var EmberDev = {};
+    var EmberDev = { assertions: {}, deprecations: {} };
 
-    EmberDev.afterEach = function() {
+    EmberDev.assertions.noViewsRemain = function(){
       if (Ember && Ember.View) {
         var viewIds = [], id;
         for (id in Ember.View.views) {
@@ -36,7 +36,9 @@
           Ember.View.views = [];
         }
       }
+    };
 
+    EmberDev.assertions.noTemplatesRemain = function(){
       if (Ember && Ember.TEMPLATES) {
         var templateNames = [], name;
         for (name in Ember.TEMPLATES) {
@@ -50,6 +52,16 @@
           Ember.TEMPLATES = {};
         }
       }
+    };
+
+    EmberDev.assertions.noExpectedDeprecations = function(){
+      window.assertDeprecation();
+    };
+
+    EmberDev.afterEach = function() {
+      EmberDev.assertions.noViewsRemain();
+      EmberDev.assertions.noTemplatesRemain();
+      EmberDev.assertions.noExpectedDeprecations();
     };
   </script>
 

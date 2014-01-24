@@ -86,26 +86,33 @@
       this.sawCall = true;
       return this.originalMethod.apply(this.target, arguments);
     },
-    stubMethod: function(fn){
-      var context = this;
-      this.originalMethod = this.target[this.property];
-      this.target[this.property] = function(){
-        return context.handleCall.apply(context, arguments);
-      };
+    stubMethod: function(replacementFunc){
+      var context = this,
+          property = this.property;
+
+      this.originalMethod = this.target[property];
+
+      if (typeof replacementFunc === 'function') {
+        this.target[property] = replacementFunc;
+      } else {
+        this.target[property] = function(){
+          return context.handleCall.apply(context, arguments);
+        };
+      }
     },
     restoreMethod: function(){
       this.target[this.property] = this.originalMethod;
     },
-    runWithStub: function(fn){
+    runWithStub: function(fn, replacementFunc){
       try {
-        this.stubMethod();
+        this.stubMethod(replacementFunc);
         fn();
       } finally {
         this.restoreMethod();
       }
     },
-    assert: function(fn) {
-      this.runWithStub();
+    assert: function() {
+      this.runWithStub.apply(this, arguments);
       ok(this.sawCall, "Expected "+this.property+" to be called.");
     }
   };
@@ -159,6 +166,13 @@
   //
   window.expectAssertion = function expectAssertion(fn, message){
     (new AssertExpectation(message)).assert(fn);
+  };
+
+  window.ignoreAssertion = function ignoreAssertion(fn){
+    var stubber = new MethodCallExpectation(Ember, 'assert'),
+        noop = function(){};
+
+    stubber.runWithStub(fn, noop);
   };
 
   EmberDev.deprecations = {

@@ -10,10 +10,10 @@ describe "Can generate the appropriate YUIDocs" do
   include TmpdirHelpers
   include IntegrationHelpers
 
-  let(:project_path) { File.join(tmpdir, 'ember-data') }
-  let(:project_git_url) { "https://github.com/emberjs/data.git" }
+  let(:project_path) { File.join(tmpdir, 'ember.js') }
+  let(:project_git_url) { "https://github.com/emberjs/ember.js.git" }
 
-  it "should be able to run the full ember.js test suite" do
+  it "should be able to generate the docs for ember.js" do
     with_clean_env do
       override_gemfile
 

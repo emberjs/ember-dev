@@ -91,6 +91,8 @@
     };
   }());
 
+  EmberDev.runningProdBuild = !!QUnit.urlParams.prod;
+
   // A light class for stubbing
   //
   function MethodCallExpectation(target, property){
@@ -182,6 +184,12 @@
   // } /* , optionalMessageStringOrRegex */);
   //
   window.expectAssertion = function expectAssertion(fn, message){
+    if (EmberDev.runningProdBuild){
+      ok(true, 'Assertions disabled in production builds.');
+      return;
+    }
+
+    // do not assert as the production builds do not contain Ember.assert
     (new AssertExpectation(message)).assert(fn);
   };
 
@@ -254,6 +262,13 @@
     }
   };
 
+  window.ignoreDeprecation = function ignoreDeprecation(fn){
+    var stubber = new MethodCallExpectation(Ember, 'deprecate'),
+        noop = function(){};
+
+    stubber.runWithStub(fn, noop);
+  };
+
   // Forces an assert the deprecations occurred, and resets the globals
   // storing asserts for the next run.
   //
@@ -277,6 +292,11 @@
     EmberDev.deprecations.restoreEmber();
     EmberDev.deprecations.actuals = null;
     EmberDev.deprecations.expecteds = null;
+
+    if (EmberDev.runningProdBuild){
+      ok(true, 'deprecations disabled in production builds.');
+      return;
+    }
 
     if (expecteds === EmberDev.deprecations.NONE) {
       var actualMessages = [];

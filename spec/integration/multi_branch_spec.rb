@@ -9,8 +9,8 @@ describe "Properly run a multi-branch test." do
   include TmpdirHelpers
   include IntegrationHelpers
 
-  let(:project_path) { File.join(tmpdir, 'ember-data') }
-  let(:project_git_url) { "https://github.com/emberjs/data.git" }
+  let(:project_path) { File.join(tmpdir, 'ember.js') }
+  let(:project_git_url) { "https://github.com/emberjs/ember.js.git" }
 
   before do
     in_repo_dir project_path do

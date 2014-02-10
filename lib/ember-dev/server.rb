@@ -74,6 +74,40 @@ module EmberDev
       end
     end
 
+    class ES6PackagesTranspile
+      def initialize(app)
+        @app = app
+        @mtime = Float::MIN
+      end
+
+      def call(env)
+        transpile if @mtime < compute_mtime
+
+        @app.call(env)
+      end
+
+      def compute_mtime
+        expanded_files.map { |f| File.mtime(f).to_f }.max || 0
+      rescue Errno::ENOENT
+        # if a file does no longer exist, the watcher is always stale.
+        Float::MAX
+      end
+
+      def expanded_files
+        Dir["packages_es6/**/*"]
+      end
+
+      def transpile
+        executable_path = './bin/transpile-packages.js'
+
+        if File.exist?(executable_path)
+          `#{executable_path}`
+
+          @mtime = compute_mtime
+        end
+      end
+    end
+
     def initialize(project=nil)
       project ||= Rake::Pipeline::Project.new(EmberDev.config.assetfile)
 
@@ -81,6 +115,8 @@ module EmberDev
 
       @app = Rack::Builder.app do
         use NoCache
+
+        use ES6PackagesTranspile
 
         use Rake::Pipeline::Middleware, project
 

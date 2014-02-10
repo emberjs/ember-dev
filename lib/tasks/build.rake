@@ -20,11 +20,28 @@ def ensure_defeatureify
   end
 end
 
+def ensure_es6_module_transpiler
+  return unless File.exists?('packages_es6')
+
+  command_path = 'node_modules/.bin/compile-modules'
+
+  unless File.exists?(command_path)
+    abort "You must have es6-module-transpiler installed to build Ember. You can install it with:\n\tnpm install"
+  end
+end
+
 config = EmberDev.config
 
 namespace :ember do
+  desc "Tranpile ES6 Modules"
+  task :transpile do
+    ensure_es6_module_transpiler
+
+    sh './bin/transpile-packages.js' if File.exists?('packages_es6')
+  end
+
   desc "Build ember.js"
-  task :dist do
+  task :dist => :transpile do
     ensure_defeatureify
 
     puts "Building #{config.name}..."

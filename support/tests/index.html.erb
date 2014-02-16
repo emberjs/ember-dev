@@ -301,7 +301,7 @@
             minispade.require(moduleName);
           }
 
-          if (EmberDev.jsHint) {
+          if (EmberDev.jsHint && !moduleName.match(/vendor\//)) {
             // JSHint all modules in this package, tests and code
             // (closure to preserve variable values)
             (function() {

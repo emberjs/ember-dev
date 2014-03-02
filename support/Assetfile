@@ -22,6 +22,10 @@ input "packages" do
     filter JSHintRC
     filter EmberLicenseFilter
     filter AddProjectVersionNumber
+
+    if defined?(ember_spade_postprocess)
+      instance_eval ember_spade_postprocess
+    end
   end
 end
 

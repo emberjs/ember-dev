@@ -87,6 +87,7 @@ module EmberDev
     end
 
     def run
+      puts test_command
       system(test_command)
 
       # A bit of a hack until we can figure this out on Travis

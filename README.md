@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/emberjs/ember-dev.png?branch=master)](https://travis-ci.org/emberjs/ember-dev)
+[![Build Status](https://travis-ci.org/emberjs/ember-dev.svg?branch=master)](https://travis-ci.org/emberjs/ember-dev)
 ## Ember Dev
 
 Ember Dev is a gem for developing Ember.js packages. The initial goal is

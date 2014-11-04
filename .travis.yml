@@ -1,21 +1,16 @@
-rvm:
-- 2.0.0
-- 2.1.0
-node_js:
-- "0.10"
+---
+language: node_js
+
+sudo: false
+
+cache:
+  directories:
+    - node_modules
+
 install:
-- bin/cached-bundle install --path vendor/bundle
-- bin/cached-npm install defeatureify yuidocjs
-before_script:
-- rake setup_test_repos
-- sudo apt-get update && sudo apt-get install git
-script: bundle exec rake test:$TEST_SUITE
-env:
-  global:
-  - S3_BUILD_CACHE_BUCKET=emberjs-build-cache
-  - GEMSPEC=ember-dev.gemspec
-  - secure: Pu2paa4khatiS9P5dNsEf4Q//lcix0JJdFwjAIRsWub9+Z7cYs+MehTNKvEuRC48mykBOCtlPnGL+1EHgSXLX79GhfCcVAPxcHpO/0MhyjGBt/4tMiKUU8DUMJbBZyB85o3bb47I6Qr4f8PXfh0XFd1fzdMR0N3dSAoY3ji7Z+w=
-  - secure: hq12fm0/8a2CG1mdBDFjI995lEmSsrT/DkXwOYhXJGUfsr005sBXovG7LtHNbjDPdcKhYI10Sxg4RjHJzX22q0VA06P9vMLUoKI1uKovsMIfLiziO0R0/Bs7Sb7l9b1o0TyTEjb884D41NfK8P7lwwCyPrA9LRX9GpLGB4HIUFQ=
-  matrix:
-  - TEST_SUITE=unit
-  - TEST_SUITE=integration
+  - npm install -g bower
+  - npm install
+  - bower install
+
+script:
+  - npm test

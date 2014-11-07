@@ -70,7 +70,7 @@ DeprecationAssert.prototype = {
         assertion.expecteds.push(message || /.*/);
         if (fn) {
           fn();
-          window.assertDeprecation();
+          assertion.assert();
         }
       }
     };

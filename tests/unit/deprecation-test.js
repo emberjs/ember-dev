@@ -47,6 +47,19 @@ test('expectDeprecation fires when an expected deprecation does not pass', funct
   assertion.assert();
 });
 
+test('expectDeprecation uses the provided callback', function(){
+  expect(1);
+
+  var Ember = { deprecate: function(){} };
+  assertion = new DeprecationAssert({Ember: Ember});
+
+  assertion.inject();
+
+  window.expectDeprecation(function() {
+    Ember.deprecate('some dep');
+  });
+});
+
 test('expectNoDeprecation fires when an un-expected deprecation calls', function(){
   expect(1);
 

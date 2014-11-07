@@ -89,6 +89,21 @@ test('setup invokes reset + inject + custom setup', function() {
   equal(setupCalled, true, 'called custom setup');
 });
 
+test('custom setup is invoked after assetions are setup', function() {
+  expect(2);
+
+  fakeQUnit.module('something', {
+    setup: function() {
+      equal(resetCount, 1, 'called reset on assertion');
+      equal(injectCount, 1, 'called inject on assertion');
+    }
+  });
+
+  var module = modules['something'];
+
+  module.setup();
+});
+
 test('teardown invokes assert + restore on assertion', function() {
   fakeQUnit.module('something');
 
@@ -125,4 +140,21 @@ test('teardown invokes assert + restore on assertion', function() {
   equal(assertCount, 1, 'called assert on assertion');
   equal(restoreCount, 1, 'called restore on assertion');
   equal(teardownCalled, true, 'called custom teardown');
+});
+
+test('custom teardown is invoked before assertions', function() {
+  expect(4);
+
+  fakeQUnit.module('something', {
+    teardown: function() {
+      equal(assertCount, 0, 'called assert on assertion');
+      equal(restoreCount, 0, 'called restore on assertion');
+    }
+  });
+
+  var module = modules['something'];
+
+  module.teardown();
+  equal(assertCount, 1, 'called assert on assertion');
+  equal(restoreCount, 1, 'called restore on assertion');
 });

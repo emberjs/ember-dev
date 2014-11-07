@@ -25,10 +25,10 @@ export default function setupQUnit(assertion, _qunitGlobal) {
       teardown: function() {
         var originalCallback = originalOptions.teardown || function() { };
 
+        originalCallback();
+
         assertion.assert();
         assertion.restore();
-
-        originalCallback();
       }
     };
 

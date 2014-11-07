@@ -109,6 +109,29 @@ test('ignoreDeprecation silences deprecations', function(){
   });
 });
 
+test('using expectNoDeprecation and expectDeprecation together throws an error', function() {
+  var Ember = { deprecate: function(){ } };
+  assertion = new DeprecationAssert({Ember: Ember});
+
+  assertion.inject();
+
+  try {
+    window.expectNoDeprecation();
+    window.expectDeprecation();
+  } catch(error) {
+    equal(error.message, 'expectDeprecation was called after expectNoDeprecation was called!');
+  }
+
+  assertion.reset();
+
+  try {
+    window.expectDeprecation();
+    window.expectNoDeprecation();
+  } catch(error) {
+    equal(error.message, 'expectNoDeprecation was called after expectDeprecation was called!');
+  }
+});
+
 /* Pending:
 test('expect no deprecation with regex matcher');
 test('expect no deprecation with string matcher');

@@ -6,6 +6,8 @@ var NONE = function(){};
 
 var DeprecationAssert = function(env){
   this.env = env;
+
+  this.reset();
 };
 
 DeprecationAssert.prototype = {
@@ -38,8 +40,8 @@ DeprecationAssert.prototype = {
     // Ember.deprecate("Old And Busted");
     //
     window.expectNoDeprecation = function() {
-      if (typeof assertion.expecteds === 'object') {
-        throw("expectNoDeprecation was called after expectDeprecation was called!");
+      if (assertion.expecteds != null && typeof assertion.expecteds === 'object') {
+        throw new Error("expectNoDeprecation was called after expectDeprecation was called!");
       }
       assertion.stubEmber();
       assertion.expecteds = NONE;
@@ -59,7 +61,7 @@ DeprecationAssert.prototype = {
     //
     window.expectDeprecation = function(fn, message) {
       if (assertion.expecteds === NONE) {
-        throw("expectDeprecation was called after expectNoDeprecation was called!");
+        throw new Error("expectDeprecation was called after expectNoDeprecation was called!");
       }
       assertion.stubEmber();
       assertion.expecteds = assertion.expecteds || [];

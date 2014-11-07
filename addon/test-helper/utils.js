@@ -1,7 +1,9 @@
 function callForEach(prop, func) {
-  for (var i=0, l=this[prop].length;i<l;i++) {
-    this[prop][i][func]();
-  }
+  return function() {
+    for (var i=0, l=this[prop].length;i<l;i++) {
+      this[prop][i][func]();
+    }
+  };
 }
 
 export function buildCompositeAssert(klasses){
@@ -16,10 +18,10 @@ export function buildCompositeAssert(klasses){
   };
 
   Composite.prototype = {
-    reset: callForEach('assertions', 'reset'),
-    inject: callForEach('assertions', 'reset'),
-    assert: callForEach('assertions', 'reset'),
-    restore: callForEach('assertions', 'restore')
+    reset: callForEach('asserts', 'reset'),
+    inject: callForEach('asserts', 'inject'),
+    assert: callForEach('asserts', 'assert'),
+    restore: callForEach('asserts', 'restore')
   };
 
   return Composite;

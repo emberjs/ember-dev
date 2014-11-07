@@ -31,7 +31,7 @@ test('expectAssertion fires when an expected assertion is not called', function(
 test('expectAssertion fires when an expected assertion does not pass', function(){
   expect(2);
 
-  var Ember = { deprecate: function(){} };
+  var Ember = { assert: function(){} };
   assertion = new AssertionAssert({Ember: Ember});
 
   assertion.inject();
@@ -47,7 +47,7 @@ test('expectAssertion fires when an expected assertion does not pass', function(
 test('expectAssertion does not fire when an expected assertion passes', function(){
   expect(2);
 
-  var Ember = { deprecate: function(){} };
+  var Ember = { assert: function(){} };
   assertion = new AssertionAssert({Ember: Ember});
 
   assertion.inject();
@@ -60,15 +60,15 @@ test('expectAssertion does not fire when an expected assertion passes', function
   });
 });
 
-test('ignoreDeprecation silences deprecations', function(){
+test('ignoreAssertion silences assertions', function(){
   expect(1);
 
-  var Ember = { assert: function(){ originalOk(false, 'should not call deprecate'); } };
+  var Ember = { assert: function(){ originalOk(false, 'should not call assert'); } };
   assertion = new AssertionAssert({Ember: Ember});
 
   assertion.inject();
   window.ignoreAssertion(function(){
-    ok(true, 'precond - deprecation callback is run');
+    ok(true, 'precond - assert callback is run');
     Ember.assert('some assert');
   });
 });

@@ -108,6 +108,20 @@ test('expectNoDeprecation fires when an un-expected deprecation calls', function
   assertion.assert();
 });
 
+test('expectNoDeprecation makes an assertion in production mode', function(){
+  expect(1);
+
+  var Ember = { deprecate: function(){} };
+  assertion = new DeprecationAssert({Ember: Ember, runningProdBuild: true});
+
+  assertion.reset();
+  assertion.inject();
+
+  window.expectNoDeprecation();
+
+  assertion.assert();
+});
+
 test('expectNoDeprecation ignores a deprecation with an argument invalidating it', function(){
   expect(1);
 

@@ -49,6 +49,16 @@ test('it does not blow up without options', function() {
   ok(typeof module.teardown === 'function', 'teardown function was added');
 });
 
+test('it preserves non setup/teardown options', function() {
+  fakeQUnit.module('something', {
+    fuzzy: 'wuzzy'
+  });
+
+  var module = modules['something'];
+
+  equal(module.fuzzy, 'wuzzy');
+});
+
 test('setup invokes reset + inject on assertion', function() {
   fakeQUnit.module('something');
 

@@ -9,27 +9,23 @@ export default function setupQUnit(assertion, _qunitGlobal) {
 
   var originalModule = qunitGlobal.module;
 
-  qunitGlobal.module = function(name, _originalOptions) {
-    var originalOptions = _originalOptions || {};
+  qunitGlobal.module = function(name, _options) {
+    var options = _options || {};
+    var originalSetup = options.setup || function() { };
+    var originalTeardown = options.teardown || function() { };
 
-    var options = {
-      setup: function() {
-        var originalCallback = originalOptions.setup || function() { };
+    options.setup = function() {
+      assertion.reset();
+      assertion.inject();
 
-        assertion.reset();
-        assertion.inject();
+      originalSetup.call(this);
+    };
 
-        originalCallback();
-      },
+    options.teardown = function() {
+      originalTeardown.call(this);
 
-      teardown: function() {
-        var originalCallback = originalOptions.teardown || function() { };
-
-        originalCallback();
-
-        assertion.assert();
-        assertion.restore();
-      }
+      assertion.assert();
+      assertion.restore();
     };
 
     return originalModule(name, options);

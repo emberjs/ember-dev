@@ -73,6 +73,7 @@ DeprecationAssert.prototype = {
         if (fn) {
           fn();
           assertion.assert();
+          assertion.expecteds.pop();
         }
       }
     };

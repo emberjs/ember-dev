@@ -100,11 +100,11 @@ DeprecationAssert.prototype = {
   // without explicit asserts.
   //
   assert: function(){
-    var expecteds = this.expecteds,
+    var expecteds = this.expecteds || [],
         actuals   = this.actuals || [];
     var o, i;
 
-    if (!expecteds) {
+    if (expecteds.length === 0 && actuals.length === 0) {
       return;
     }
 

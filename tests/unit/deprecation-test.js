@@ -60,6 +60,21 @@ test('expectDeprecation uses the provided callback', function(){
   });
 });
 
+test('expectDeprecation makes a single assertion regardless of deprecation in production builds', function(){
+  expect(2);
+
+  var Ember = { deprecate: function(){} };
+  assertion = new DeprecationAssert({Ember: Ember, runningProdBuild: true});
+
+  assertion.inject();
+
+  window.expectDeprecation(function() {
+    ok(true, 'callback was called in production');
+  });
+
+  assertion.assert();
+});
+
 test('expectDeprecation with a provided callback only asserts once', function(){
   expect(1);
 

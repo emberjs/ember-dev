@@ -104,7 +104,7 @@ DeprecationAssert.prototype = {
         actuals   = this.actuals || [];
     var o, i;
 
-    if (expecteds.length === 0 && actuals.length === 0) {
+    if (expecteds !== NONE && expecteds.length === 0 && actuals.length === 0) {
       return;
     }
 

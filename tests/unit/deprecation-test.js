@@ -60,6 +60,21 @@ test('expectDeprecation uses the provided callback', function(){
   });
 });
 
+test('expectDeprecation with a provided callback only asserts once', function(){
+  expect(1);
+
+  var Ember = { deprecate: function(){} };
+  assertion = new DeprecationAssert({Ember: Ember});
+
+  assertion.inject();
+
+  window.expectDeprecation(function() {
+    Ember.deprecate('some dep');
+  }, 'some dep');
+
+  assertion.assert();
+});
+
 test('expectNoDeprecation fires when an un-expected deprecation calls', function(){
   expect(1);
 

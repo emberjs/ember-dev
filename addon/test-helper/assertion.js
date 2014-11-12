@@ -10,10 +10,14 @@ function AssertExpectation(Ember, message){
 AssertExpectation.Error = function(){};
 AssertExpectation.prototype = o_create(MethodCallExpectation.prototype);
 AssertExpectation.prototype.handleCall = function(message, test){
+  var noAssertion = typeof test === 'function' ? test() : test;
+
   this.sawCall = true;
-  if (test) {
-    return; // Only get message for failures
+
+  if (noAssertion) {
+    return;
   }
+
   this.actualMessage = message;
   // Halt execution
   throw new AssertExpectation.Error();

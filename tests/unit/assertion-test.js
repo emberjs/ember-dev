@@ -28,7 +28,7 @@ test('expectAssertion fires when an expected assertion is not called', function(
   });
 });
 
-test('expectAssertion fires when an expected assertion does not pass', function(){
+test('expectAssertion fires when an expected assertion does not pass for boolean values', function(){
   expect(2);
 
   var Ember = { assert: function(){} };
@@ -37,14 +37,26 @@ test('expectAssertion fires when an expected assertion does not pass', function(
   assertion.inject();
   window.expectAssertion(function(){
     originalOk(true, 'precond - assertion expectation is called');
-    QUnit.ok = function(isOk){
-      originalOk(isOk);
-    };
     Ember.assert('some assert', false);
   });
 });
 
-test('expectAssertion does not fire when an expected assertion passes', function(){
+test('expectAssertion fires when an expected assertion does not pass for functions', function(){
+  expect(2);
+
+  var Ember = { assert: function(){} };
+  assertion = new AssertionAssert({Ember: Ember});
+
+  assertion.inject();
+  window.expectAssertion(function(){
+    originalOk(true, 'precond - assertion expectation is called');
+    Ember.assert('some assert', function() {
+      return false;
+    });
+  });
+});
+
+test('expectAssertion does not fire when an expected assertion passes for boolean values', function(){
   expect(2);
 
   var Ember = { assert: function(){} };
@@ -57,6 +69,24 @@ test('expectAssertion does not fire when an expected assertion passes', function
       originalOk(!isOk);
     };
     Ember.assert('some assert', true);
+  });
+});
+
+test('expectAssertion does not fire when an expected assertion passes for functions', function(){
+  expect(2);
+
+  var Ember = { assert: function(){} };
+  assertion = new AssertionAssert({Ember: Ember});
+
+  assertion.inject();
+  window.expectAssertion(function(){
+    originalOk(true, 'precond - assertion expectation is called');
+    QUnit.ok = function(isOk){
+      originalOk(!isOk);
+    };
+    Ember.assert('some assert', function() {
+      return true;
+    });
   });
 });
 

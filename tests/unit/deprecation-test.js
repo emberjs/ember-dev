@@ -29,7 +29,7 @@ test('expectDeprecation fires when an expected deprecation is not called', funct
   assertion.assert();
 });
 
-test('expectDeprecation fires when an expected deprecation does not pass', function(){
+test('expectDeprecation fires when an expected deprecation does not pass for boolean values', function(){
   expect(1);
 
   var Ember = { deprecate: function(){} };
@@ -46,6 +46,47 @@ test('expectDeprecation fires when an expected deprecation does not pass', funct
 
   assertion.assert();
 });
+
+test('expectDeprecation fires when an expected deprecation does not pass for functions', function(){
+  expect(1);
+
+  var Ember = { deprecate: function(){} };
+  assertion = new DeprecationAssert({Ember: Ember});
+
+  assertion.inject();
+  window.expectDeprecation();
+
+  QUnit.ok = function(isOk){
+    originalOk(!isOk);
+  };
+
+  Ember.deprecate('some dep', function() {
+    return true;
+  });
+
+  assertion.assert();
+});
+
+test('expectDeprecation fires when an expected deprecation does not pass for functions', function(){
+  expect(1);
+
+  var Ember = { deprecate: function(){} };
+  assertion = new DeprecationAssert({Ember: Ember});
+
+  assertion.inject();
+  window.expectDeprecation();
+
+  QUnit.ok = function(isOk){
+    originalOk(!isOk);
+  };
+
+  Ember.deprecate('some dep', function() {
+    return false;
+  });
+
+  assertion.assert();
+});
+
 
 test('expectDeprecation uses the provided callback', function(){
   expect(1);

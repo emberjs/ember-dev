@@ -62,6 +62,8 @@ DeprecationAssert.prototype = {
     // Ember.deprecate("Old And Busted");
     //
     window.expectDeprecation = function(fn, message) {
+      var originalExpecteds, originalActuals;
+
       if (assertion.expecteds === NONE) {
         throw new Error("expectDeprecation was called after expectNoDeprecation was called!");
       }
@@ -71,11 +73,17 @@ DeprecationAssert.prototype = {
         // fn is a message
         assertion.expecteds.push(fn);
       } else {
+        originalExpecteds = assertion.expecteds.slice();
+        originalActuals = assertion.actuals ? assertion.actuals.slice() : assertion.actuals;
+
         assertion.expecteds.push(message || /.*/);
+
         if (fn) {
           fn();
           assertion.assert();
-          assertion.expecteds.pop();
+
+          assertion.expecteds = originalExpecteds;
+          assertion.actuals = originalActuals;
         }
       }
     };

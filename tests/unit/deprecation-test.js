@@ -101,6 +101,23 @@ test('expectDeprecation uses the provided callback', function(){
   });
 });
 
+test('expectDeprecation with a provided callback does not loose additional deprecations', function(){
+  expect(2);
+
+  var Ember = { deprecate: function(){} };
+  assertion = new DeprecationAssert({Ember: Ember});
+
+  assertion.inject();
+
+  window.expectDeprecation('stuff');
+  window.expectDeprecation(function() {
+    Ember.deprecate('some dep');
+    Ember.deprecate('stuff');
+  }, /some dep/);
+
+  assertion.assert();
+});
+
 test('expectDeprecation makes a single assertion regardless of deprecation in production builds', function(){
   expect(2);
 

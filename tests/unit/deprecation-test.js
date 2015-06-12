@@ -67,7 +67,7 @@ test('expectDeprecation fires when an expected deprecation does not pass for fun
   assertion.assert();
 });
 
-test('expectDeprecation fires when an expected deprecation does not pass for functions', function(){
+test('expectDeprecation fires when an expected deprecation does pass for functions', function(){
   expect(1);
 
   var Ember = { deprecate: function(){} };
@@ -77,7 +77,7 @@ test('expectDeprecation fires when an expected deprecation does not pass for fun
   window.expectDeprecation();
 
   QUnit.ok = function(isOk){
-    originalOk(!isOk);
+    originalOk(isOk);
   };
 
   Ember.deprecate('some dep', function() {

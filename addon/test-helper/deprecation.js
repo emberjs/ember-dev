@@ -23,11 +23,12 @@ DeprecationAssert.prototype = {
     }
     var assertion = this;
     this.env.Ember.deprecate = function(msg, test) {
-      var pushDeprecation = typeof test === 'function' ? !test() : !test;
+      var resultOfTest = typeof test === 'function' ? test() : test;
+      var shouldDeprecate = !resultOfTest;
 
       assertion.actuals = assertion.actuals || [];
-      if (pushDeprecation) {
-        assertion.actuals.push([msg, test]);
+      if (shouldDeprecate) {
+        assertion.actuals.push([msg, resultOfTest]);
       }
     };
   },

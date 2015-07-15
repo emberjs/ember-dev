@@ -27,7 +27,7 @@ export function buildCompositeAssert(klasses){
   return Composite;
 }
 
-var o_create = Object.create || (function(){
+export var o_create = Object.create || (function(){
   function F(){}
 
   return function(o) {
@@ -38,5 +38,3 @@ var o_create = Object.create || (function(){
     return new F();
   };
 }());
-
-export var o_create;

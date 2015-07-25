@@ -1,14 +1,13 @@
 /* globals QUnit */
 
 import MethodCallExpectation from "./method-call-expectation";
-import { o_create } from "./utils";
 
 function AssertExpectation(Ember, message){
   MethodCallExpectation.call(this, Ember, 'assert');
   this.expectedMessage = message;
 }
 AssertExpectation.Error = function(){};
-AssertExpectation.prototype = o_create(MethodCallExpectation.prototype);
+AssertExpectation.prototype = Object.create(MethodCallExpectation.prototype);
 AssertExpectation.prototype.handleCall = function(message, test){
   var noAssertion = typeof test === 'function' ? test() : test;
 

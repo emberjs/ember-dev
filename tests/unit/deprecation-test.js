@@ -39,6 +39,70 @@ test('expectDeprecation fires when an expected deprecation is not called', funct
   assertion.assert();
 });
 
+test('expectDeprecation asserts when string does not match exactly', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  QUnit.ok = function(isOk){
+    originalOk(!isOk);
+  };
+
+  window.expectDeprecation('some dep');
+
+  Ember.deprecate('some dep with long desc');
+
+  assertion.assert();
+});
+
+test('expectDeprecation does not assert when string matches exactly', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  window.expectDeprecation('some dep');
+
+  Ember.deprecate('some dep');
+
+  assertion.assert();
+});
+
+test('expectDeprecation asserts when regex does not match', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  QUnit.ok = function(isOk){
+    originalOk(!isOk);
+  };
+
+  window.expectDeprecation(/some dep/);
+
+  Ember.deprecate('some different dep');
+
+  assertion.assert();
+});
+
+test('expectDeprecation does not assert when regex matches', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  window.expectDeprecation(/some dep/);
+
+  Ember.deprecate('some dep with long desc');
+
+  assertion.assert();
+});
+
 test('expectDeprecation fires when an expected deprecation does not pass for boolean values', function(){
   expect(1);
 
@@ -105,6 +169,62 @@ test('expectDeprecation uses the provided callback', function(){
   window.expectDeprecation(function() {
     Ember.deprecate('some dep');
   });
+});
+
+test('expectDeprecation asserts when given a callback and string does not match exactly', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  QUnit.ok = function(isOk){
+    originalOk(!isOk);
+  };
+
+  window.expectDeprecation(function() {
+    Ember.deprecate('some dep with long desc');
+  }, 'some dep');
+});
+
+test('expectDeprecation does not assert when given a callback and string matches exactly', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  window.expectDeprecation(function() {
+    Ember.deprecate('some dep');
+  }, 'some dep');
+});
+
+test('expectDeprecation asserts when given a callback and regex does not match', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  QUnit.ok = function(isOk){
+    originalOk(!isOk);
+  };
+
+  window.expectDeprecation(function() {
+    Ember.deprecate('some different dep');
+  }, /some dep/);
+});
+
+test('expectDeprecation does not assert when given a callback and regex matches', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  window.expectDeprecation(function() {
+    Ember.deprecate('some dep with long desc');
+  }, /some dep/);
 });
 
 test('expectDeprecation makes a single assertion regardless of deprecation in production builds', function(){
@@ -234,13 +354,3 @@ test('using expectNoDeprecation and expectDeprecation together throws an error',
     equal(error.message, 'expectNoDeprecation was called after expectDeprecation was called!');
   }
 });
-
-/* Pending:
-test('expect no deprecation with regex matcher');
-test('expect no deprecation with string matcher');
-test('expect deprecation with regex matcher');
-test('expect deprecation with string matcher');
-test('expect deprecation with block form');
-test('expect deprecation with block form and string matcher');
-test('expect deprecation with block form and regex matcher');
-*/

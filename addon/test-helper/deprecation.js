@@ -37,7 +37,7 @@ DeprecationAssert.prototype = {
     // Expects no deprecation to happen from the time of calling until
     // the end of the test.
     //
-    // expectNoDeprecation(/* optionalStringOrRegex */);
+    // expectNoDeprecation();
     // Ember.deprecate("Old And Busted");
     //
     let expectNoDeprecation = () => {

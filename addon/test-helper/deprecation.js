@@ -34,18 +34,36 @@ DeprecationAssert.prototype = {
   },
 
   inject() {
-    // Expects no deprecation to happen from the time of calling until
-    // the end of the test.
+    // Expects no deprecation to happen within a function, or if no function is
+    // passed, from the time of calling until the end of the test.
+    //
+    // expectNoDeprecation(function() {
+    //   fancyNewThing();
+    // });
     //
     // expectNoDeprecation();
     // Ember.deprecate("Old And Busted");
     //
-    let expectNoDeprecation = () => {
+    let expectNoDeprecation = (func) => {
+      var originalExpecteds, originalActuals;
+
       if (this.expecteds != null && typeof this.expecteds === 'object') {
         throw new Error("expectNoDeprecation was called after expectDeprecation was called!");
       }
+
+      originalExpecteds = this.expecteds ? this.expecteds.slice() : this.expecteds;
+      originalActuals = this.actuals ? this.actuals.slice() : this.actuals;
+
       this.stubEmber();
       this.expecteds = NONE;
+
+      if (func && typeof func === 'function') {
+        func();
+        this.assert();
+
+        this.expecteds = originalExpecteds;
+        this.actuals = originalActuals;
+      }
     };
 
     // Expect a deprecation to happen within a function, or if no function

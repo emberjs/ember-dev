@@ -316,6 +316,22 @@ test('expectNoDeprecation ignores a deprecation with an argument invalidating it
   assertion.assert();
 });
 
+test('expectNoDeprecation uses the provided callback', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+
+  QUnit.ok = function(isOk){
+    originalOk(!isOk);
+  };
+
+  window.expectNoDeprecation(function() {
+    Ember.deprecate('some dep');
+  });
+});
+
 test('ignoreDeprecation silences deprecations', function(){
   expect(1);
 

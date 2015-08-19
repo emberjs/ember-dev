@@ -24,6 +24,19 @@ module('DeprecationAssert', {
   }
 });
 
+test('Ember.deprecate is restored properly', function() {
+  expect(1);
+
+  assertion = new DeprecationAssert(env);
+
+  assertion.inject();
+  // Force the method to be stubbed
+  window.expectNoDeprecation();
+  assertion.restore();
+
+  equal(env.getDebugFunction('deprecate'), originalDeprecate);
+});
+
 test('expectDeprecation fires when an expected deprecation is not called', function(){
   expect(1);
 
@@ -282,6 +295,25 @@ test('expectNoDeprecation fires when an un-expected deprecation calls', function
   };
 
   Ember.deprecate('some dep');
+
+  assertion.assert();
+});
+
+test('expectNoDeprecation fires when a deprecation does not pass for functions', function(){
+  expect(1);
+
+  assertion = new DeprecationAssert(makeEnv());
+
+  assertion.inject();
+  window.expectNoDeprecation();
+
+  QUnit.ok = function(isOk){
+    originalOk(isOk);
+  };
+
+  Ember.deprecate('some dep', function() {
+    return true;
+  });
 
   assertion.assert();
 });

@@ -1,36 +1,17 @@
-/* globals QUnit */
+import MethodCallTracker from './method-call-tracker';
+import { callWithStub } from './utils';
 
-import { callWithStub, checkTest } from './utils';
-
-var NONE = function() {};
-
-var DeprecationAssert = function(env){
+var DeprecationAssert = function(env) {
   this.env = env;
-  this.reset();
 };
 
 DeprecationAssert.prototype = {
-
   reset() {
-    this.expecteds = null;
-    this.actuals = null;
-    this.originalDeprecate = null;
-  },
-
-  stubEmber() {
-    if (!this.originalDeprecate) {
-      this.originalDeprecate = this.env.getDebugFunction('deprecate');
+    if (this.tracker) {
+      this.tracker.restoreMethod();
     }
 
-    this.env.setDebugFunction('deprecate', (message, test) => {
-      var resultOfTest = checkTest(test);
-      var shouldDeprecate = !resultOfTest;
-
-      this.actuals = this.actuals || [];
-      if (shouldDeprecate) {
-        this.actuals.push([message, resultOfTest]);
-      }
-    });
+    this.tracker = null;
   },
 
   inject() {
@@ -45,25 +26,17 @@ DeprecationAssert.prototype = {
     // Ember.deprecate("Old And Busted");
     //
     let expectNoDeprecation = (func) => {
-      var originalExpecteds, originalActuals;
-
-      if (this.expecteds != null && typeof this.expecteds === 'object') {
-        throw new Error("expectNoDeprecation was called after expectDeprecation was called!");
+      if (typeof func !== 'function') {
+        func = null;
       }
 
-      originalExpecteds = this.expecteds ? this.expecteds.slice() : this.expecteds;
-      originalActuals = this.actuals ? this.actuals.slice() : this.actuals;
+      this.runExpectation(func, (tracker) => {
+        if (tracker.isExpectingCalls()) {
+          throw new Error("expectNoDeprecation was called after expectDeprecation was called!");
+        }
 
-      this.stubEmber();
-      this.expecteds = NONE;
-
-      if (func && typeof func === 'function') {
-        func();
-        this.assert();
-
-        this.expecteds = originalExpecteds;
-        this.actuals = originalActuals;
-      }
+        tracker.expectNoCalls();
+      });
     };
 
     // Expect a deprecation to happen within a function, or if no function
@@ -79,30 +52,18 @@ DeprecationAssert.prototype = {
     // Ember.deprecate("Old And Busted");
     //
     let expectDeprecation = (func, message) => {
-      var originalExpecteds, originalActuals;
-
-      if (this.expecteds === NONE) {
-        throw new Error("expectDeprecation was called after expectNoDeprecation was called!");
+      if (typeof func !== 'function') {
+        message = func;
+        func = null;
       }
-      this.stubEmber();
-      this.expecteds = this.expecteds || [];
-      if (func && typeof func !== 'function') {
-        // func is a message
-        this.expecteds.push(func);
-      } else {
-        originalExpecteds = this.expecteds.slice();
-        originalActuals = this.actuals ? this.actuals.slice() : this.actuals;
 
-        this.expecteds.push(message || /.*/);
-
-        if (func) {
-          func();
-          this.assert();
-
-          this.expecteds = originalExpecteds;
-          this.actuals = originalActuals;
+      this.runExpectation(func, (tracker) => {
+        if (tracker.isExpectingNoCalls()) {
+          throw new Error("expectDeprecation was called after expectNoDeprecation was called!");
         }
-      }
+
+        tracker.expectCall(message);
+      });
     };
 
     let ignoreDeprecation = (func) => {
@@ -127,73 +88,43 @@ DeprecationAssert.prototype = {
   // without explicit asserts.
   //
   assert() {
-    var expecteds = this.expecteds || [],
-        actuals   = this.actuals || [];
-    var o, i;
-
-    if (expecteds !== NONE && expecteds.length === 0 && actuals.length === 0) {
-      return;
-    }
-
-    if (this.env.runningProdBuild){
-      QUnit.ok(true, 'deprecations disabled in production builds.');
-      return;
-    }
-
-    if (expecteds === NONE) {
-      var actualMessages = [];
-      for (i=0;i<actuals.length;i++) {
-        actualMessages.push(actuals[i][0]);
-      }
-      QUnit.ok(actuals.length === 0, "Expected no deprecation calls, got "+actuals.length+": "+actualMessages.join(', '));
-      return;
-    }
-
-    var expected, actual, match;
-
-    for (o=0;o < expecteds.length; o++) {
-      expected = expecteds[o];
-      for (i=0;i < actuals.length; i++) {
-        actual = actuals[i];
-        if (!actual[1]) {
-          if (expected instanceof RegExp) {
-            if (expected.test(actual[0])) {
-              match = actual;
-              break;
-            }
-          } else {
-            if (expected === actual[0]) {
-              match = actual;
-              break;
-            }
-          }
-        }
-      }
-
-      if (!actual) {
-        QUnit.ok(false, "Recieved no deprecate calls at all, expecting: "+expected);
-      } else if (match && !match[1]) {
-        QUnit.ok(true, "Recieved failing deprecation with message: "+match[0]);
-      } else if (match && match[1]) {
-        QUnit.ok(false, "Expected failing deprecation, got succeeding with message: "+match[0]);
-      } else if (actual[1]) {
-        QUnit.ok(false, "Did not receive failing deprecation matching '"+expected+"', last was success with '"+actual[0]+"'");
-      } else if (!actual[1]) {
-        QUnit.ok(false, "Did not receive failing deprecation matching '"+expected+"', last was failure with '"+actual[0]+"'");
-      }
+    if (this.tracker) {
+      this.tracker.assert();
     }
   },
 
   restore() {
-    if (this.originalDeprecate) {
-      this.env.setDebugFunction('deprecate', this.originalDeprecate);
+    this.reset();
+    window.expectDeprecation = null;
+    window.expectNoDeprecation = null;
+    window.ignoreDeprecation = null;
+  },
+
+  runExpectation(func, callback)  {
+    let originalTracker;
+
+    // When helpers are passed a callback, they get a new tracker context
+    if (func) {
+      originalTracker = this.tracker;
+      this.tracker = null;
     }
 
-    window.expectNoDeprecation = null;
-    window.expectDeprecation = null;
-    window.ignoreDeprecation = null;
-  }
+    if (!this.tracker) {
+      this.tracker = new MethodCallTracker(this.env, 'deprecate');
+    }
 
+    callback(this.tracker);
+
+    // Once the given callback is invoked, the pending assertions should be
+    // flushed immediately
+    if (func) {
+      func();
+      this.assert();
+      this.reset();
+
+      this.tracker = originalTracker;
+    }
+  }
 };
 
 export default DeprecationAssert;

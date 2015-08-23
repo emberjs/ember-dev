@@ -1,11 +1,22 @@
+import Ember from 'ember';
 import DeprecationAssert from 'ember-dev/test-helper/deprecation';
+import makeEnv from '../helpers/make-env';
 
-var originalOk = QUnit.ok;
-var assertion;
+let originalOk;
+let originalDeprecate;
+let assertion;
+
+let env = makeEnv();
 
 module('DeprecationAssert', {
-  teardown: function(){
+  beforeEach() {
+    originalOk = QUnit.ok;
+    originalDeprecate = env.getDebugFunction('deprecate');
+  },
+  afterEach() {
     QUnit.ok = originalOk;
+    env.setDebugFunction('deprecate', originalDeprecate);
+
     if (assertion) {
       assertion.restore();
       assertion = null;
@@ -16,8 +27,7 @@ module('DeprecationAssert', {
 test('expectDeprecation fires when an expected deprecation is not called', function(){
   expect(1);
 
-  var Ember = {};
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
   window.expectDeprecation();
@@ -32,8 +42,7 @@ test('expectDeprecation fires when an expected deprecation is not called', funct
 test('expectDeprecation fires when an expected deprecation does not pass for boolean values', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
   window.expectDeprecation();
@@ -50,8 +59,7 @@ test('expectDeprecation fires when an expected deprecation does not pass for boo
 test('expectDeprecation fires when an expected deprecation does not pass for functions', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
   window.expectDeprecation();
@@ -70,8 +78,7 @@ test('expectDeprecation fires when an expected deprecation does not pass for fun
 test('expectDeprecation fires when an expected deprecation does pass for functions', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
   window.expectDeprecation();
@@ -91,8 +98,7 @@ test('expectDeprecation fires when an expected deprecation does pass for functio
 test('expectDeprecation uses the provided callback', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
 
@@ -104,8 +110,7 @@ test('expectDeprecation uses the provided callback', function(){
 test('expectDeprecation makes a single assertion regardless of deprecation in production builds', function(){
   expect(2);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember, runningProdBuild: true});
+  assertion = new DeprecationAssert(makeEnv({ runningProdBuild: true }));
 
   assertion.inject();
 
@@ -119,8 +124,7 @@ test('expectDeprecation makes a single assertion regardless of deprecation in pr
 test('expectDeprecation with a provided callback only asserts once', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
 
@@ -134,8 +138,7 @@ test('expectDeprecation with a provided callback only asserts once', function(){
 test('expectDeprecation with callback in production does not assert twice', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember, runningProdBuild: true});
+  assertion = new DeprecationAssert(makeEnv({ runningProdBuild: true }));
 
   assertion.inject();
 
@@ -149,8 +152,7 @@ test('expectDeprecation with callback in production does not assert twice', func
 test('expectNoDeprecation fires when an un-expected deprecation calls', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
   window.expectNoDeprecation();
@@ -167,8 +169,7 @@ test('expectNoDeprecation fires when an un-expected deprecation calls', function
 test('expectNoDeprecation makes an assertion in production mode', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember, runningProdBuild: true});
+  assertion = new DeprecationAssert(makeEnv({ runningProdBuild: true }));
 
   assertion.reset();
   assertion.inject();
@@ -181,8 +182,7 @@ test('expectNoDeprecation makes an assertion in production mode', function(){
 test('expectNoDeprecation ignores a deprecation with an argument invalidating it', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){} };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
   window.expectNoDeprecation();
@@ -199,8 +199,12 @@ test('expectNoDeprecation ignores a deprecation with an argument invalidating it
 test('ignoreDeprecation silences deprecations', function(){
   expect(1);
 
-  var Ember = { deprecate: function(){ originalOk(false, 'should not call deprecate'); } };
-  assertion = new DeprecationAssert({Ember: Ember});
+  let env = makeEnv();
+  env.setDebugFunction('deprecate', function() {
+    originalOk(false, 'should not call deprecate');
+  });
+
+  assertion = new DeprecationAssert(env);
 
   assertion.inject();
   window.ignoreDeprecation(function(){
@@ -210,8 +214,7 @@ test('ignoreDeprecation silences deprecations', function(){
 });
 
 test('using expectNoDeprecation and expectDeprecation together throws an error', function() {
-  var Ember = { deprecate: function(){ } };
-  assertion = new DeprecationAssert({Ember: Ember});
+  assertion = new DeprecationAssert(makeEnv());
 
   assertion.inject();
 

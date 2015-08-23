@@ -1,12 +1,12 @@
 import Ember from 'ember';
 
 export default function makeEnv(options) {
-  let assertModule = Ember.__loader.require('ember-metal/assert');
+  let debugModule = Ember.__loader.require('ember-metal/debug');
 
   return Ember.merge({
     Ember: Ember,
     runningProdBuild: false,
-    getDebugFunction: assertModule.getDebugFunction,
-    setDebugFunction: assertModule.setDebugFunction
+    getDebugFunction: debugModule.getDebugFunction,
+    setDebugFunction: debugModule.setDebugFunction
   }, options);
 }

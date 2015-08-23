@@ -6,16 +6,10 @@ function callForEach(prop, func) {
   };
 }
 
-export function buildCompositeAssert(klasses){
-  var Composite = function(emberKlass, runningProdBuild){
-    this.asserts = [];
-    for (var i=0, l=klasses.length;i<l;i++) {
-      this.asserts.push(new klasses[i]({
-        Ember: emberKlass,
-        runningProdBuild: runningProdBuild
-      }));
-    }
-  };
+export function buildCompositeAssert(assertClasses) {
+  function Composite(env) {
+    this.asserts = assertClasses.map(Assert => new Assert(env));
+  }
 
   Composite.prototype = {
     reset: callForEach('asserts', 'reset'),

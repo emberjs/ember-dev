@@ -18,11 +18,12 @@ DeprecationAssert.prototype = {
   },
 
   stubEmber: function(){
-    if (!this._previousEmberDeprecate && this._previousEmberDeprecate !== this.env.Ember.deprecate) {
-      this._previousEmberDeprecate = this.env.Ember.deprecate;
+    if (!this._previousEmberDeprecate) {
+      this._previousEmberDeprecate = this.env.getDebugFunction('deprecate');
     }
+
     var assertion = this;
-    this.env.Ember.deprecate = function(msg, test) {
+    this.env.setDebugFunction('deprecate', function(msg, test) {
       var resultOfTest = typeof test === 'function' ? test() : test;
       var shouldDeprecate = !resultOfTest;
 
@@ -30,7 +31,7 @@ DeprecationAssert.prototype = {
       if (shouldDeprecate) {
         assertion.actuals.push([msg, resultOfTest]);
       }
-    };
+    });
   },
 
   inject: function(){
@@ -170,7 +171,7 @@ DeprecationAssert.prototype = {
 
   restore: function(){
     if (this._previousEmberDeprecate) {
-      this.env.Ember.deprecate = this._previousEmberDeprecate;
+      this.env.setDebugFunction('deprecate', this._previousEmberDeprecate);
       this._previousEmberDeprecate = null;
     }
     window.expectNoDeprecation = null;

@@ -1,54 +1,51 @@
 /* globals QUnit */
 
-import MethodCallExpectation from "./method-call-expectation";
+import { callWithStub, checkTest } from './utils';
 
-var NONE = function(){};
+var NONE = function() {};
 
 var DeprecationAssert = function(env){
   this.env = env;
-
   this.reset();
 };
 
 DeprecationAssert.prototype = {
 
-  reset: function(){
+  reset() {
     this.expecteds = null;
     this.actuals = null;
+    this.originalDeprecate = null;
   },
 
-  stubEmber: function(){
-    if (!this._previousEmberDeprecate) {
-      this._previousEmberDeprecate = this.env.getDebugFunction('deprecate');
+  stubEmber() {
+    if (!this.originalDeprecate) {
+      this.originalDeprecate = this.env.getDebugFunction('deprecate');
     }
 
-    var assertion = this;
-    this.env.setDebugFunction('deprecate', function(msg, test) {
-      var resultOfTest = typeof test === 'function' ? test() : test;
+    this.env.setDebugFunction('deprecate', (message, test) => {
+      var resultOfTest = checkTest(test);
       var shouldDeprecate = !resultOfTest;
 
-      assertion.actuals = assertion.actuals || [];
+      this.actuals = this.actuals || [];
       if (shouldDeprecate) {
-        assertion.actuals.push([msg, resultOfTest]);
+        this.actuals.push([message, resultOfTest]);
       }
     });
   },
 
-  inject: function(){
-    var assertion = this;
-
+  inject() {
     // Expects no deprecation to happen from the time of calling until
     // the end of the test.
     //
     // expectNoDeprecation(/* optionalStringOrRegex */);
     // Ember.deprecate("Old And Busted");
     //
-    window.expectNoDeprecation = function() {
-      if (assertion.expecteds != null && typeof assertion.expecteds === 'object') {
+    let expectNoDeprecation = () => {
+      if (this.expecteds != null && typeof this.expecteds === 'object') {
         throw new Error("expectNoDeprecation was called after expectDeprecation was called!");
       }
-      assertion.stubEmber();
-      assertion.expecteds = NONE;
+      this.stubEmber();
+      this.expecteds = NONE;
     };
 
     // Expect a deprecation to happen within a function, or if no function
@@ -56,54 +53,54 @@ DeprecationAssert.prototype = {
     // multiple times to assert deprecations with different specific messages
     // were fired.
     //
-    // expectDeprecation(function(){
+    // expectDeprecation(function() {
     //   Ember.deprecate("Old And Busted");
     // }, /* optionalStringOrRegex */);
     //
     // expectDeprecation(/* optionalStringOrRegex */);
     // Ember.deprecate("Old And Busted");
     //
-    window.expectDeprecation = function(fn, message) {
+    let expectDeprecation = (func, message) => {
       var originalExpecteds, originalActuals;
 
-      if (assertion.expecteds === NONE) {
+      if (this.expecteds === NONE) {
         throw new Error("expectDeprecation was called after expectNoDeprecation was called!");
       }
-      assertion.stubEmber();
-      assertion.expecteds = assertion.expecteds || [];
-      if (fn && typeof fn !== 'function') {
-        // fn is a message
-        assertion.expecteds.push(fn);
+      this.stubEmber();
+      this.expecteds = this.expecteds || [];
+      if (func && typeof func !== 'function') {
+        // func is a message
+        this.expecteds.push(func);
       } else {
-        originalExpecteds = assertion.expecteds.slice();
-        originalActuals = assertion.actuals ? assertion.actuals.slice() : assertion.actuals;
+        originalExpecteds = this.expecteds.slice();
+        originalActuals = this.actuals ? this.actuals.slice() : this.actuals;
 
-        assertion.expecteds.push(message || /.*/);
+        this.expecteds.push(message || /.*/);
 
-        if (fn) {
-          fn();
-          assertion.assert();
+        if (func) {
+          func();
+          this.assert();
 
-          assertion.expecteds = originalExpecteds;
-          assertion.actuals = originalActuals;
+          this.expecteds = originalExpecteds;
+          this.actuals = originalActuals;
         }
       }
     };
 
-    window.ignoreDeprecation = function ignoreDeprecation(fn){
-      var stubber = new MethodCallExpectation(assertion.env.Ember, 'deprecate'),
-          noop = function(){};
-
-      stubber.runWithStub(fn, noop);
+    let ignoreDeprecation = (func) => {
+      callWithStub(this.env, 'deprecate', func);
     };
 
+    window.expectNoDeprecation = expectNoDeprecation;
+    window.expectDeprecation = expectDeprecation;
+    window.ignoreDeprecation = ignoreDeprecation;
   },
 
   // Forces an assert the deprecations occurred, and resets the globals
   // storing asserts for the next run.
   //
   // expectNoDeprecation(/Old/);
-  // setTimeout(function(){
+  // setTimeout(function() {
   //   Ember.deprecate("Old And Busted");
   //   assertDeprecation();
   // });
@@ -111,7 +108,7 @@ DeprecationAssert.prototype = {
   // assertDeprecation is called after each test run to catch any expectations
   // without explicit asserts.
   //
-  assert: function(){
+  assert() {
     var expecteds = this.expecteds || [],
         actuals   = this.actuals || [];
     var o, i;
@@ -169,12 +166,14 @@ DeprecationAssert.prototype = {
     }
   },
 
-  restore: function(){
-    if (this._previousEmberDeprecate) {
-      this.env.setDebugFunction('deprecate', this._previousEmberDeprecate);
-      this._previousEmberDeprecate = null;
+  restore() {
+    if (this.originalDeprecate) {
+      this.env.setDebugFunction('deprecate', this.originalDeprecate);
     }
+
     window.expectNoDeprecation = null;
+    window.expectDeprecation = null;
+    window.ignoreDeprecation = null;
   }
 
 };

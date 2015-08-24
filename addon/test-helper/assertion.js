@@ -26,7 +26,6 @@ export default function AssertionAssert(env) {
 }
 
 AssertionAssert.prototype = {
-  // TODO: Can these two methods be removed?
   reset() { },
   assert() { },
 

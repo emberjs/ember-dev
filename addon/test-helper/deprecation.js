@@ -1,18 +1,10 @@
-import MethodCallTracker from './method-call-tracker';
+import DebugAssert from './debug';
 import { callWithStub } from './utils';
 
-var DeprecationAssert = function(env) {
-  this.env = env;
-};
-
-DeprecationAssert.prototype = {
-  reset() {
-    if (this.tracker) {
-      this.tracker.restoreMethod();
-    }
-
-    this.tracker = null;
-  },
+class DeprecationAssert extends DebugAssert {
+  constructor(env) {
+    super('deprecate', env);
+  }
 
   inject() {
     // Expects no deprecation to happen within a function, or if no function is
@@ -73,58 +65,14 @@ DeprecationAssert.prototype = {
     window.expectNoDeprecation = expectNoDeprecation;
     window.expectDeprecation = expectDeprecation;
     window.ignoreDeprecation = ignoreDeprecation;
-  },
-
-  // Forces an assert the deprecations occurred, and resets the globals
-  // storing asserts for the next run.
-  //
-  // expectNoDeprecation(/Old/);
-  // setTimeout(function() {
-  //   Ember.deprecate("Old And Busted");
-  //   assertDeprecation();
-  // });
-  //
-  // assertDeprecation is called after each test run to catch any expectations
-  // without explicit asserts.
-  //
-  assert() {
-    if (this.tracker) {
-      this.tracker.assert();
-    }
-  },
+  }
 
   restore() {
-    this.reset();
+    super.restore();
     window.expectDeprecation = null;
     window.expectNoDeprecation = null;
     window.ignoreDeprecation = null;
-  },
-
-  runExpectation(func, callback)  {
-    let originalTracker;
-
-    // When helpers are passed a callback, they get a new tracker context
-    if (func) {
-      originalTracker = this.tracker;
-      this.tracker = null;
-    }
-
-    if (!this.tracker) {
-      this.tracker = new MethodCallTracker(this.env, 'deprecate');
-    }
-
-    callback(this.tracker);
-
-    // Once the given callback is invoked, the pending assertions should be
-    // flushed immediately
-    if (func) {
-      func();
-      this.assert();
-      this.reset();
-
-      this.tracker = originalTracker;
-    }
   }
-};
+}
 
 export default DeprecationAssert;

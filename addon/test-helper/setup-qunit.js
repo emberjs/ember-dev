@@ -18,11 +18,11 @@ export default function setupQUnit(assertion, _qunitGlobal) {
       assertion.reset();
       assertion.inject();
 
-      originalSetup.call(this);
+      originalSetup.apply(this, arguments);
     };
 
     options.teardown = function() {
-      originalTeardown.call(this);
+      originalTeardown.apply(this, arguments);
 
       assertion.assert();
       assertion.restore();

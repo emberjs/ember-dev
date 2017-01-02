@@ -21,11 +21,40 @@ export default function setupQUnit(assertion, _qunitGlobal) {
       originalSetup.apply(this, arguments);
     };
 
-    options.teardown = function() {
-      originalTeardown.apply(this, arguments);
+    options.teardown = function(assert) {
+      var result = originalTeardown.apply(this, arguments);
 
-      assertion.assert();
-      assertion.restore();
+      if (result && result.then) {
+        var done = assert.async();
+        return result.then(function(value) {
+          // this is basically the worst thing ever, but
+          // by default Ember automatically wraps all RSVP
+          // promises in a run-loop.  THAT IS WONDERFUL!!!
+          //
+          // However, it is not so wonderful when you are actually
+          // trying to confirm that you are not incorrectly in a
+          // run-loop after the tests are all done. :(
+          //
+          // This works by forcing the actual assertions to happen
+          // shortly after the promise resolves (and uses `assert.async`
+          // to ensure QUnit doesn't move on to the next test)
+          setTimeout(function() {
+            assertion.assert();
+            assertion.restore();
+            done();
+          }, 0);
+
+          return value;
+        })
+        .catch(function(reason) {
+          done();
+          throw reason;
+        });
+      } else {
+        assertion.assert();
+        assertion.restore();
+        return result;
+      }
     };
 
     return originalModule(name, options);

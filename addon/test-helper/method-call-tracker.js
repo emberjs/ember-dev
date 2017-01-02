@@ -103,9 +103,9 @@ MethodCallTracker.prototype = {
       }
 
       if (!actual) {
-        QUnit.ok(false, `Recieved no Ember.${methodName} calls at all, expecting: ${expected}`);
+        QUnit.ok(false, `Received no Ember.${methodName} calls at all, expecting: ${expected}`);
       } else if (match && !match[1]) {
-        QUnit.ok(true, `Recieved failing Ember.${methodName} call with message: ${match[0]}`);
+        QUnit.ok(true, `Received failing Ember.${methodName} call with message: ${match[0]}`);
       } else if (match && match[1]) {
         QUnit.ok(false, `Expected failing Ember.${methodName} call, got succeeding with message: ${match[0]}`);
       } else if (actual[1]) {
